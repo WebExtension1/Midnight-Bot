@@ -1,65 +1,44 @@
-import 'dotenv/config';
+import dotenv from "dotenv";
 import express from 'express';
-import {
-  InteractionResponseType,
-  InteractionType,
-  verifyKeyMiddleware,
-} from 'discord-interactions';
-import { getRandomEmoji, getRandomQuote } from './utils.js';
 
+import cors from "cors";
+import { Client, GatewayIntentBits } from 'discord.js';
+
+import router from './router.js'
+import interactions from './interactions.js';
+
+dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
+app.use(cors({ origin: `http://localhost:${PORT}` }));
+app.use(express.json());
 
-app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (req, res) {
-  // Interaction id, type and data
-  const { id, type, data } = req.body;
-
-  // Handle verification requests
-  if (type === InteractionType.PING) {
-    return res.send({ type: InteractionResponseType.PONG });
-  }
-
-  /**
-   * Handle slash command requests
-   * See https://discord.com/developers/docs/interactions/application-commands#slash-commands
-   */
-  if (type === InteractionType.APPLICATION_COMMAND) {
-    const { name } = data;
-
-    if (name === 'react') {
-      return res.send({
-        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-        data: {
-          content: `${getRandomEmoji()}`,
-        },
-      });
-    }
-
-    if (name === 'quote') {
-      return res.send({
-        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-        data: {
-          content: `${getRandomQuote()}`,
-        },
-      });
-    }
-
-    if (name === 'linktree') {
-      return res.send({
-        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-        data: {
-          content: `[Linktree](https://linktr.ee/bigladmelton)`,
-        },
-      });
-    }
-
-    console.error(`unknown command: ${name}`);
-    return res.status(400).json({ error: 'unknown command' });
-  }
-
-  console.error('unknown interaction type', type);
-  return res.status(400).json({ error: 'unknown interaction type' });
+const client = new Client({
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
+  ],
 });
+
+client.once('ready', () => {
+  client.user.setPresence({
+    activities: [{
+      name: 'Eating Cat Treats',
+      type: 4,
+      emoji: { name: "CatTreat", id: 1349755255675556080, },
+      state: "🐱 Eating Cat Treats",
+    }],
+    status: 'online',
+  });
+});
+
+client.login(process.env.BOT_TOKEN);
+
+export { client };
+
+app.use("/router", router);
+app.use("/interactions", interactions)
 
 app.listen(PORT, () => {
   console.log('Listening on port', PORT);

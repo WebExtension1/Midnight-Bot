@@ -62,6 +62,7 @@ export function getRandomEmoji() {
     '<:MidnightScream:1348762988596822036>',
     '<:MorbinTime:1348763090270818355>',
     '<:Wizard:1175826895716229201>',
+    '<:CatTreat:1349755255675556080>',
   ];
   return emojiList[Math.floor(Math.random() * emojiList.length)];
 }
@@ -72,7 +73,7 @@ export function getRandomQuote() {
     `Fuck you Web`,
     `"I like.. Watched seagulls" - Kelton`,
     `"I kinda just don't think stuff" - Melton`,
-    `"Nobody has ever told me what my eye colours are, but I think they're brown" - Kelton`
+    `"Nobody has ever told me what my eye colours are, but I think they're brown" - Kelton`,
   ]
   return quoteList[Math.floor(Math.random() * quoteList.length)];
 }
