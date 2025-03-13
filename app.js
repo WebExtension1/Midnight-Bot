@@ -5,7 +5,7 @@ import {
   InteractionType,
   verifyKeyMiddleware,
 } from 'discord-interactions';
-import { getRandomEmoji } from './utils.js';
+import { getRandomEmoji, getRandomQuote } from './utils.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -31,6 +31,24 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
         data: {
           content: `${getRandomEmoji()}`,
+        },
+      });
+    }
+
+    if (name === 'quote') {
+      return res.send({
+        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+        data: {
+          content: `${getRandomQuote()}`,
+        },
+      });
+    }
+
+    if (name === 'linktree') {
+      return res.send({
+        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+        data: {
+          content: `[Linktree](https://linktr.ee/bigladmelton)`,
         },
       });
     }

@@ -66,6 +66,17 @@ export function getRandomEmoji() {
   return emojiList[Math.floor(Math.random() * emojiList.length)];
 }
 
+export function getRandomQuote() {
+  // This should be replaced by an API eventually
+  const quoteList = [
+    `Fuck you Web`,
+    `"I like.. Watched seagulls" - Kelton`,
+    `"I kinda just don't think stuff" - Melton`,
+    `"Nobody has ever told me what my eye colours are, but I think they're brown" - Kelton`
+  ]
+  return quoteList[Math.floor(Math.random() * quoteList.length)];
+}
+
 export function capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
