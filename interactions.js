@@ -1,5 +1,4 @@
 import express from "express";
-import { getRandomQuote } from './utils.js';
 import {
     InteractionResponseType,
     InteractionType,
@@ -14,7 +13,7 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
     const { id, type, data } = req.body;
 
     if (type === InteractionType.APPLICATION_COMMAND) {
-        const { name } = data;
+        const { name, options } = data;
 
         // Complete
 
@@ -58,13 +57,50 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
         // Incomplete
 
         // Needs to be in db
+
+        function formatDate(inputDate) {
+            const date = new Date(inputDate);
+        
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const day = date.getDate();
+            const month = date.getMonth() + 1;
+            const year = date.getFullYear();
+        
+            return `${day}/${month}/${year} at ${hours}:${minutes}`;
+        }
+
         if (name === 'quote') {
+            const data = await fetch("http://localhost:3333/router/quote/get", {
+                method: "GET"
+            });
+            const response = await data.json();
+            let quote = await response[Math.floor(Math.random() * response.length)];
+
+            if (options) {
+                quote = response.find(quote => quote.quote_id = options?.find(opt => opt.name === 'id')?.value);
+            }
+            
+            if (quote)
             return res.send({
                 type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                 data: {
-                    content: `${getRandomQuote()}`,
+                    embeds: [
+                        {
+                            title: `"${quote.data}"`,
+                            description: `– ${quote.quoted}`,
+                            color: 0x0099ff,
+                            fields: [
+                                { name: "Quoted by", value: `**${quote.user}**`, inline: true },
+                                { name: "Game", value: `**${quote.game}**`, inline: true },
+                                { name: "Date", value: `**${formatDate(quote.date)}**`, inline: true }
+                            ],
+                        }
+                    ]
                 },
             });
+            else
+            return res.status(400).json({ error: 'unknown id' });
         }
 
         if (name === 'gif') {

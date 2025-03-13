@@ -12,9 +12,14 @@ const REACT = {
 const QUOTE = {
   name: 'quote',
   description: 'Get a random quote from the stream.',
-  type: 1,
-  integration_types: [0, 1],
-  contexts: [0, 1, 2],
+  options: [
+    {
+      name: "id",
+      description: "Optional ID of the quote you want to see",
+      type: 4,
+      required: false
+    }
+  ]
 }
 
 const LINKTREE = {
