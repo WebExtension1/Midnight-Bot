@@ -41,7 +41,7 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
 
         // Needs frontend
         if (name === 'fact') {
-            const data = await fetch("http://localhost:3333/router/fact/get", {
+            const data = await fetch(`http://${process.env.DB_HOST}:3333/router/fact/get`, {
                 method: "GET"
             });
             const response = await data.json();
@@ -71,7 +71,7 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
         }
 
         if (name === 'quote') {
-            const data = await fetch("http://localhost:3333/router/quote/get", {
+            const data = await fetch(`http://${process.env.DB_HOST}:3333/router/quote/get`, {
                 method: "GET"
             });
             const response = await data.json();
@@ -87,7 +87,40 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                 data: {
                     embeds: [
                         {
-                            title: `"${quote.data}"`,
+                            title: `Did you know! "${quote.data}"`,
+                            description: `– ${quote.quoted}`,
+                            color: 0x0099ff,
+                            fields: [
+                                { name: "Quoted by", value: `**${quote.user}**`, inline: true },
+                                { name: "Game", value: `**${quote.game}**`, inline: true },
+                                { name: "Date", value: `**${formatDate(quote.date)}**`, inline: true }
+                            ],
+                        }
+                    ]
+                },
+            });
+            else
+            return res.status(400).json({ error: 'unknown id' });
+        }
+
+        if (name === 'test') {
+            const data = await fetch(`http://${process.env.DB_HOST}:3333/router/quote/get`, {
+                method: "GET"
+            });
+            const response = await data.json();
+            let quote = await response[Math.floor(Math.random() * response.length)];
+
+            if (options) {
+                quote = response.find(quote => quote.quote_id = options?.find(opt => opt.name === 'id')?.value);
+            }
+            
+            if (quote)
+            return res.send({
+                type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                data: {
+                    embeds: [
+                        {
+                            title: `Did you know! "${quote.data}"`,
                             description: `– ${quote.quoted}`,
                             color: 0x0099ff,
                             fields: [
@@ -104,7 +137,7 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
         }
 
         if (name === 'gif') {
-            const data = await fetch("http://localhost:3333/router/gif/get", {
+            const data = await fetch(`http://${process.env.DB_HOST}:3333/router/gif/get`, {
                 method: "GET"
             });
             const response = await data.json();

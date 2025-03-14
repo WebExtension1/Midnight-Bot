@@ -36,6 +36,18 @@ export async function InstallGlobalCommands(appId, commands) {
   }
 }
 
+export async function InstallGuildCommands(appId, guildID, commands) {
+  // API endpoint to overwrite global commands
+  const endpoint = `applications/${appId}/guilds/${guildID}/commands`;
+
+  try {
+    // This is calling the bulk overwrite endpoint: https://discord.com/developers/docs/interactions/application-commands#bulk-overwrite-global-application-commands
+    await DiscordRequest(endpoint, { method: 'PUT', body: commands });
+  } catch (err) {
+    console.error(err);
+  }
+}
+
 export function capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }

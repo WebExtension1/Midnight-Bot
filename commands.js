@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { InstallGlobalCommands } from './utils.js';
+import { InstallGlobalCommands, InstallGuildCommands } from './utils.js';
 
 const REACT = {
   name: 'react',
@@ -49,3 +49,15 @@ const GIF = {
 const ALL_COMMANDS = [REACT, QUOTE, LINKTREE, FACT, GIF];
 
 InstallGlobalCommands(process.env.APP_ID, ALL_COMMANDS);
+
+const TEST = {
+  name: "test",
+  description: 'Test',
+  type: 1,
+  integration_types: [0, 1],
+  contexts: [0, 1, 2],
+}
+
+const ALL_PRIVATE_COMMANDS = [TEST];
+
+InstallGuildCommands(process.env.APP_ID, process.env.GUILD_ID, ALL_PRIVATE_COMMANDS);
