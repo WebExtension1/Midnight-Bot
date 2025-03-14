@@ -69,7 +69,7 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
         
             return `${day}/${month}/${year} at ${hours}:${minutes}`;
         }
-        
+
         if (name === 'quote') {
             const data = await fetch(`http://${process.env.DB_HOST}:3333/router/quote/get`, {
                 method: "GET"
@@ -114,13 +114,14 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                     embeds: [
                         {
                             content: `${message}`,
-                            title: `Did you know! "${quote.data}"`,
+                            title: `"${quote.data}"`,
                             description: `– ${quote.quoted}`,
                             color: 0x0099ff,
                             fields: [
                                 { name: "Quoted by", value: `**${quote.user}**`, inline: true },
                                 { name: "Game", value: `**${quote.game}**`, inline: true },
-                                { name: "Date", value: `**${formatDate(quote.date)}**`, inline: true }
+                                { name: "Date", value: `**${formatDate(quote.date)}**`, inline: true },
+                                { name: "ID", value: `**${quote.quote_id}**`, inline: true }
                             ],
                         }
                     ]
@@ -138,6 +139,45 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                 type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                 data: {
                     content: `${response[Math.floor(Math.random() * response.length)].data}`,
+                },
+            });
+        }
+
+        if (name === 'quote-add') {
+            const data = options?.find(opt => opt.name === 'data')?.value;
+            const quoted = options?.find(opt => opt.name === 'daquotedta')?.value;
+            const quoted_by = options?.find(opt => opt.name === 'quoted_by')?.value;
+            const game = options?.find(opt => opt.name === 'game')?.value;
+
+            if (!data || !quoted || !quoted_by || !game) {
+                return res.send({
+                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data: {
+                        content: `All details need to be specified.`,
+                    },
+                });
+            }
+
+            const query = await fetch(`http://${process.env.DB_HOST}:3333/router/quote/add`, {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ data, quoted, quoted_by, game })
+            });
+            const response = await query.json();
+
+            if (response.affectedRows > 0) {
+                return res.send({
+                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data: {
+                        content: `Quote successfully added.`,
+                    },
+                });
+            }
+
+            return res.send({
+                type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                data: {
+                    content: `Database insertion failed.`,
                 },
             });
         }
