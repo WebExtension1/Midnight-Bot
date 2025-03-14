@@ -4,11 +4,43 @@ CREATE TABLE If Not Exists facts (
     PRIMARY KEY (fact_id)
 );
 
+INSERT INTO facts (data) VALUES
+("Melton has a skill issue diagnosis."),
+("Melton watches seagulls."),
+("Melton will be doing a PNG Melton Debut stream."),
+("Melton has a gay cousin, Ilikementon."),
+("Felton has dark fantasies, that's why Melton doesn't bring him on stream."),
+("Melton has chronic Meltonitus."),
+("Melton Loves his Pimp."),
+("Melton fell from a high place."),
+("You can use code 'Melt350' for £3.50 of any of Melton's Melters Shoes at checkout (stocks out)."),
+("The Melton-verse is real, we've only seen Melton, Kelton, Felton, Pimpton and Bigton."),
+("Pin Web_extension to get banned."),
+("BigLadMelton streams on twitch."),
+("Melton has the trophy 'I Swear! I Did It By Mistake!'. 4 times...");
+
 CREATE TABLE If Not Exists gifs (
     gif_id int NOT NULL AUTO_INCREMENT,
     data text NOT NULL,
     PRIMARY KEY (gif_id)
 );
+
+INSERT INTO gifs (data) VALUES
+("https://tenor.com/view/bigladmelton-explaining-lego-gif-1300325614556513036"),
+("https://tenor.com/view/bigladmelton-explaining-gif-8942065841876218200"),
+("https://tenor.com/view/bigladmelton-street-fighter-dont-care-didnt-ask-gif-17995565090236909428"),
+("https://tenor.com/view/bigladmelton-hat-thief-gif-12086097342561099678"),
+("https://tenor.com/view/melton-bigladmelton-gif-6149943951091651109"),
+("https://tenor.com/view/bigladmelton-cry-about-it-meme-gif-9312611278483328821"),
+("https://tenor.com/view/bigladmelton-dead-plank-cex-gif-18019686792664430579"),
+("https://tenor.com/view/bigladmelton-dissatisfied-disappointed-gif-10114429942190455924"),
+("https://tenor.com/view/bigladmelton-stunned-baffled-shocked-gif-13522910704304901867"),
+("https://tenor.com/view/bigladmelton-swingingfeet-feet-gif-15027759635213824642"),
+("https://tenor.com/view/bigladmelton-head-headexplode-explode-gif-14907635343518473313"),
+("https://tenor.com/view/bigladmelton-refrigerator-gif-1957018527798943370"),
+("https://tenor.com/view/melton-bigladmelton-dance-gif-13371883567957050545"),
+("https://tenor.com/view/melton-bigladmelton-hottogo-gif-3739717782094617660"),
+("https://tenor.com/view/melton-bigladmelton-dance-gif-12260361903975044575");
 
 CREATE TABLE If Not Exists quotes (
     quote_id int NOT NULL AUTO_INCREMENT,
