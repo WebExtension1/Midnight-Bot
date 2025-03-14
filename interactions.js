@@ -69,41 +69,8 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
         
             return `${day}/${month}/${year} at ${hours}:${minutes}`;
         }
-
+        
         if (name === 'quote') {
-            const data = await fetch(`http://${process.env.DB_HOST}:3333/router/quote/get`, {
-                method: "GET"
-            });
-            const response = await data.json();
-            let quote = await response[Math.floor(Math.random() * response.length)];
-
-            if (options) {
-                quote = response.find(quote => quote.quote_id = options?.find(opt => opt.name === 'id')?.value);
-            }
-            
-            if (quote)
-            return res.send({
-                type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-                data: {
-                    embeds: [
-                        {
-                            title: `"${quote.data}"`,
-                            description: `– ${quote.quoted}`,
-                            color: 0x0099ff,
-                            fields: [
-                                { name: "Quoted by", value: `**${quote.user}**`, inline: true },
-                                { name: "Game", value: `**${quote.game}**`, inline: true },
-                                { name: "Date", value: `**${formatDate(quote.date)}**`, inline: true }
-                            ],
-                        }
-                    ]
-                },
-            });
-            else
-            return res.status(400).json({ error: 'unknown id' });
-        }
-
-        if (name === 'test') {
             const data = await fetch(`http://${process.env.DB_HOST}:3333/router/quote/get`, {
                 method: "GET"
             });
@@ -122,9 +89,9 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                     const game = options?.find(opt => opt.name === 'game')?.value;
 
                     const quotes = response.filter(quote =>
-                        (!quoted || quote.quoted == quoted) &&
-                        (!quoted_by || quote.quoted_by == quoted_by) &&
-                        (!game || quote.game == game)
+                        (!quoted || quote.quoted === quoted) &&
+                        (!quoted_by || quote.user === quoted_by) &&
+                        (!game || quote.game === game)
                     );
 
                     if (!quotes) {

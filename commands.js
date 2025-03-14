@@ -15,8 +15,26 @@ const QUOTE = {
   options: [
     {
       name: "id",
-      description: "Optional ID of the quote you want to see",
+      description: "(Optional) ID of the quote.",
       type: 4,
+      required: false
+    },
+    {
+      name: "quoted",
+      description: "(Optional) Who said the quote.",
+      type: 3,
+      required: false
+    },
+    {
+      name: "quoted_by",
+      description: "(Optional) Who added the quote.",
+      type: 3,
+      required: false
+    },
+    {
+      name: "game",
+      description: "(Optional) The game that was being played.",
+      type: 3,
       required: false
     }
   ]
