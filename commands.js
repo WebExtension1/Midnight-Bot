@@ -51,11 +51,34 @@ const ALL_COMMANDS = [REACT, QUOTE, LINKTREE, FACT, GIF];
 InstallGlobalCommands(process.env.APP_ID, ALL_COMMANDS);
 
 const TEST = {
-  name: "test",
-  description: 'Test',
-  type: 1,
-  integration_types: [0, 1],
-  contexts: [0, 1, 2],
+  name: 'test',
+  description: 'Get a random quote from the stream.',
+  options: [
+    {
+      name: "id",
+      description: "(Optional) ID of the quote.",
+      type: 4,
+      required: false
+    },
+    {
+      name: "quoted",
+      description: "(Optional) Who said the quote.",
+      type: 4,
+      required: false
+    },
+    {
+      name: "quoted_by",
+      description: "(Optional) Who added the quote.",
+      type: 4,
+      required: false
+    },
+    {
+      name: "game",
+      description: "(Optional) The game that was being played.",
+      type: 4,
+      required: false
+    }
+  ]
 }
 
 const ALL_PRIVATE_COMMANDS = [TEST];

@@ -49,7 +49,7 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
             return res.send({
                 type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                 data: {
-                    content: `${response[Math.floor(Math.random() * response.length)].data}`,
+                    content: `Did you know! ${response[Math.floor(Math.random() * response.length)].data}`,
                 },
             });
         }
@@ -87,7 +87,7 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                 data: {
                     embeds: [
                         {
-                            title: `Did you know! "${quote.data}"`,
+                            title: `"${quote.data}"`,
                             description: `– ${quote.quoted}`,
                             color: 0x0099ff,
                             fields: [
@@ -109,9 +109,31 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
             });
             const response = await data.json();
             let quote = await response[Math.floor(Math.random() * response.length)];
+            const message = "";
 
             if (options) {
-                quote = response.find(quote => quote.quote_id = options?.find(opt => opt.name === 'id')?.value);
+                const id = options?.find(opt => opt.name === 'id')?.value
+                if (id) {
+                    quote = response.find(quote => quote.quote_id = id);
+                }
+                else {
+                    const quoted = options?.find(opt => opt.name === 'quoted')?.value;
+                    const quoted_by = options?.find(opt => opt.name === 'quoted_by')?.value;
+                    const game = options?.find(opt => opt.name === 'game')?.value;
+
+                    const quotes = response.find(quote =>
+                        quoted && quote.quoted == quote,
+                        quoted_by && quote.quoted_by == quoted_by,
+                        game && quote.game == game
+                    );
+
+                    if (!quotes) {
+                        message = "We couldn't find a quote matching that criteria, so here's a random one!";
+                    }
+                    else {
+                        quote = quotes[Math.floor(Math.random() * quotes.length)];
+                    }
+                }
             }
             
             if (quote)
@@ -120,6 +142,7 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                 data: {
                     embeds: [
                         {
+                            content: `${message}`,
                             title: `Did you know! "${quote.data}"`,
                             description: `– ${quote.quoted}`,
                             color: 0x0099ff,
