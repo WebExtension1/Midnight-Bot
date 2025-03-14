@@ -122,9 +122,9 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                     const game = options?.find(opt => opt.name === 'game')?.value;
 
                     const quotes = response.find(quote =>
-                        quoted && quote.quoted == quote,
-                        quoted_by && quote.quoted_by == quoted_by,
-                        game && quote.game == game
+                        (!quoted || quote.quoted === quoted) &&
+                        (!quoted_by || quote.quoted_by === quoted_by) &&
+                        (!game || quote.game === game)
                     );
 
                     if (!quotes) {
