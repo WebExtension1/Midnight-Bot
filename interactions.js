@@ -145,7 +145,7 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
 
         if (name === 'quote-add') {
             const data = options?.find(opt => opt.name === 'data')?.value;
-            const quoted = options?.find(opt => opt.name === 'daquotedta')?.value;
+            const quoted = options?.find(opt => opt.name === 'quoted')?.value;
             const quoted_by = options?.find(opt => opt.name === 'quoted_by')?.value;
             const game = options?.find(opt => opt.name === 'game')?.value;
 

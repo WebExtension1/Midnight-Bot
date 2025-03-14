@@ -94,7 +94,7 @@ const QUOTE_ADD = {
       name: "game",
       description: "The game that was being played.",
       type: 3,
-      required: false
+      required: true
     }
   ]
 }
