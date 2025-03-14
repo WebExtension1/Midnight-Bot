@@ -1,3 +1,25 @@
+CREATE TABLE If Not Exists facts (
+    fact_id int NOT NULL AUTO_INCREMENT,
+    data text NOT NULL,
+    PRIMARY KEY (fact_id)
+);
+
+CREATE TABLE If Not Exists gifs (
+    gif_id int NOT NULL AUTO_INCREMENT,
+    data text NOT NULL,
+    PRIMARY KEY (gif_id)
+);
+
+CREATE TABLE If Not Exists quotes (
+    quote_id int NOT NULL AUTO_INCREMENT,
+    data text NOT NULL,
+    quoted text NOT NULL,
+    user text NOT NULL,
+    game text NOT NULL,
+    date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (quote_id)
+);
+
 INSERT INTO quotes (data, quoted, user, game, date) VALUES
 ("Conor is a great big sexy beast, I want his luscious flesh for breakfast.", "Melton", "web_extension", "Resident Evil 7 Biohazard", "2020-04-28 17:11:00"),
 ("How did I know that was gonna be coming?", "Melton", "aestheticalknob", "Resident Evil 7 Biohazard", "2020-04-28 17:12:00"),
