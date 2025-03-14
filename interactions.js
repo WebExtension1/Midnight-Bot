@@ -109,34 +109,38 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
             });
             const response = await data.json();
             let quote = await response[Math.floor(Math.random() * response.length)];
-            const message = "";
+            let message = "";
 
             if (options) {
                 const id = options?.find(opt => opt.name === 'id')?.value
                 if (id) {
-                    quote = response.find(quote => quote.quote_id = id);
+                    quote = response.find(quote => quote.quote_id === id);
                 }
                 else {
                     const quoted = options?.find(opt => opt.name === 'quoted')?.value;
                     const quoted_by = options?.find(opt => opt.name === 'quoted_by')?.value;
                     const game = options?.find(opt => opt.name === 'game')?.value;
 
-                    const quotes = response.find(quote =>
-                        (!quoted || quote.quoted === quoted) &&
-                        (!quoted_by || quote.quoted_by === quoted_by) &&
-                        (!game || quote.game === game)
+                    const quotes = response.filter(quote =>
+                        (!quoted || quote.quoted == quoted) &&
+                        (!quoted_by || quote.quoted_by == quoted_by) &&
+                        (!game || quote.game == game)
                     );
 
                     if (!quotes) {
                         message = "We couldn't find a quote matching that criteria, so here's a random one!";
                     }
-                    else {
+                    else if (quotes.length > 0) {
                         quote = quotes[Math.floor(Math.random() * quotes.length)];
+                    } else {
+                        message = "We couldn't find a quote matching that criteria, so here's a random one!";
                     }
                 }
             }
             
-            if (quote)
+            if (!quote)
+                return res.status(400).json({ error: 'Error resolving the request' });
+
             return res.send({
                 type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                 data: {
@@ -155,8 +159,6 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                     ]
                 },
             });
-            else
-            return res.status(400).json({ error: 'unknown id' });
         }
 
         if (name === 'gif') {

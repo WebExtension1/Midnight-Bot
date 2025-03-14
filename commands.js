@@ -63,19 +63,19 @@ const TEST = {
     {
       name: "quoted",
       description: "(Optional) Who said the quote.",
-      type: 4,
+      type: 3,
       required: false
     },
     {
       name: "quoted_by",
       description: "(Optional) Who added the quote.",
-      type: 4,
+      type: 3,
       required: false
     },
     {
       name: "game",
       description: "(Optional) The game that was being played.",
-      type: 4,
+      type: 3,
       required: false
     }
   ]
