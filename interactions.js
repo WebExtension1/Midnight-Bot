@@ -41,6 +41,17 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                 method: "GET"
             });
             const response = await data.json();
+            let fact = response[Math.floor(Math.random() * response.length)];
+
+            if (options) {
+                const id = options?.find(opt => opt.name === 'id')?.value
+                if (id) {
+                    fact = response.find(fact => fact.fact_id === id);
+                }
+            }
+
+            if (!fact)
+                return res.status(400).json({ error: 'Error resolving the request' });
 
             return res.send({
                 type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
@@ -48,10 +59,10 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                     embeds: [
                         {
                             title: `Did you know!`,
-                            description: `${response[Math.floor(Math.random() * response.length)].data}`,
+                            description: `${fact.data}`,
                             color: 0x0099ff,
                             fields: [
-                                { name: "ID", value: `**${quote.quote_id}**`, inline: true }
+                                { name: "ID", value: `**${fact.fact_id}**`, inline: true }
                             ],
                         }
                     ]
@@ -65,7 +76,6 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
             });
             const response = await data.json();
             let quote = await response[Math.floor(Math.random() * response.length)];
-            let message = "";
 
             if (options) {
                 const id = options?.find(opt => opt.name === 'id')?.value
@@ -85,8 +95,6 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
 
                     if (quotes.length > 0) {
                         quote = quotes[Math.floor(Math.random() * quotes.length)];
-                    } else {
-                        message = "We couldn't find a quote matching that criteria, so here's a random one!";
                     }
                 }
             }
@@ -99,7 +107,6 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                 data: {
                     embeds: [
                         {
-                            content: `${message}`,
                             title: `"${quote.data}"`,
                             description: `– ${quote.quoted}`,
                             color: 0x0099ff,
