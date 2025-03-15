@@ -133,25 +133,40 @@ const GIF_ADD = {
 const QUOTE_DEBUG = {
   name: 'quote-debug',
   description: 'Debug Quotes',
-  type: 1,
-  integration_types: [0, 1],
-  contexts: [0, 1, 2],
+  options: [
+    {
+      name: "pagination",
+      description: "Ranges in 25s.",
+      type: 3,
+      required: true
+    }
+  ]
 }
 
 const FACT_DEBUG = {
   name: 'fact-debug',
   description: 'Debug Facts',
-  type: 1,
-  integration_types: [0, 1],
-  contexts: [0, 1, 2],
+  options: [
+    {
+      name: "pagination",
+      description: "Ranges in 25s.",
+      type: 3,
+      required: true
+    }
+  ]
 }
 
 const GIF_DEBUG = {
   name: 'gif-debug',
   description: 'Debug Gifs',
-  type: 1,
-  integration_types: [0, 1],
-  contexts: [0, 1, 2],
+  options: [
+    {
+      name: "pagination",
+      description: "Ranges in 25s.",
+      type: 3,
+      required: true
+    }
+  ]
 }
 
 const ALL_PRIVATE_COMMANDS = [QUOTE_ADD, FACT_ADD, GIF_ADD, QUOTE_DEBUG, FACT_DEBUG, GIF_DEBUG];

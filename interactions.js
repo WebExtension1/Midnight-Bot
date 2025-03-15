@@ -141,7 +141,18 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                 method: "GET"
             });
             const response = await data.json();
-            let gifs = response.map(gif => gif.gif_id + ': ' + gif.data );
+
+            const page = options?.find(opt => opt.name === 'pagination')?.value;
+
+            const gifs = response.filter(gif => gif.gif_id > ((page - 1) * 25) && gif.gif_id <= (page * 25)).map(gif => gif.gif_id + ': ' + gif.data );
+
+            if (!gifs)
+                return res.send({
+                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data: {
+                        content: `Pagination was outside the scope of the array. There are ${response.length} gifs in the db.`,
+                    },
+                });
 
             return res.send({
                 type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
@@ -156,7 +167,19 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                 method: "GET"
             });
             const response = await data.json();
-            let quotes = response.map(quote => quote.quote_id + ': ' + quote.data + ' - ' + quote.quoted + '. By ' + quote.quoted_by + ' playing ' + quote.game + ' at ' + quote.date );
+
+            const page = options?.find(opt => opt.name === 'pagination')?.value;
+
+            const quotes = response.filter(quote => quote.quote_id > ((page - 1) * 25) && quote.quote_id <= (page * 25)).map(quote => quote.quote_id + ': ' + quote.data + ' - ' + quote.quoted + '. By ' + quote.quoted_by + ' playing ' + quote.game + ' at ' + quote.date );
+
+            if (!quotes)
+                return res.send({
+                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data: {
+                        content: `Pagination was outside the scope of the array. There are ${response.length} gifs in the db.`,
+                    },
+                });
+
 
             return res.send({
                 type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
@@ -171,12 +194,24 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                 method: "GET"
             });
             const response = await data.json();
-            let facts = response.map(fact => fact.fact_id + ': ' + fact.data );
+
+            const page = options?.find(opt => opt.name === 'pagination')?.value;
+
+            const facts = response.filter(fact => fact.fact_id > ((page - 1) * 25) && fact.fact_id <= (page * 25)).map(fact => fact.fact_id + ': ' + fact.data );
+
+            if (!facts)
+                return res.send({
+                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data: {
+                        content: `Pagination was outside the scope of the array. There are ${response.length} gifs in the db.`,
+                    },
+                });
+
 
             return res.send({
                 type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                 data: {
-                    content: `${fact.join('\n')}`,
+                    content: `${facts.join('\n')}`,
                 },
             });
         }
