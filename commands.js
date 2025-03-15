@@ -9,6 +9,14 @@ const REACT = {
   contexts: [0, 1, 2],
 };
 
+const LINKTREE = {
+  name: 'linktree',
+  description: 'Get a link to BigLadMeltons linktree.',
+  type: 1,
+  integration_types: [0, 1],
+  contexts: [0, 1, 2],
+}
+
 const QUOTE = {
   name: 'quote',
   description: 'Get a random quote from the stream.',
@@ -40,14 +48,6 @@ const QUOTE = {
   ]
 }
 
-const LINKTREE = {
-  name: 'linktree',
-  description: 'Get a link to BigLadMeltons linktree.',
-  type: 1,
-  integration_types: [0, 1],
-  contexts: [0, 1, 2],
-}
-
 const FACT = {
   name: 'fact',
   description: 'Did you know?',
@@ -70,11 +70,11 @@ InstallGlobalCommands(process.env.APP_ID, ALL_COMMANDS);
 
 const QUOTE_ADD = {
   name: 'quote-add',
-  description: 'Get a random quote from the stream.',
+  description: 'Add a new quote.',
   options: [
     {
       name: "data",
-      description: "The quote.",
+      description: "The quote. Don't add quotes and correctly punctuate.",
       type: 3,
       required: true
     },
@@ -99,6 +99,32 @@ const QUOTE_ADD = {
   ]
 }
 
-const ALL_PRIVATE_COMMANDS = [QUOTE_ADD];
+const FACT_ADD = {
+  name: 'fact-add',
+  description: 'Add a new fact.',
+  options: [
+    {
+      name: "data",
+      description: "The fact. Don't write 'Did you know!' as it is automatically appended.",
+      type: 3,
+      required: true
+    }
+  ]
+}
+
+const GIF_ADD = {
+  name: 'gif-add',
+  description: 'Add a new gif.',
+  options: [
+    {
+      name: "data",
+      description: "The gif link.",
+      type: 3,
+      required: true
+    }
+  ]
+}
+
+const ALL_PRIVATE_COMMANDS = [QUOTE_ADD, FACT_ADD, GIF_ADD];
 
 InstallGuildCommands(process.env.APP_ID, process.env.PRIVATE_GUILD_ID, ALL_PRIVATE_COMMANDS);

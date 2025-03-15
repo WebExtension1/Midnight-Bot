@@ -16,8 +16,6 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
     if (type === InteractionType.APPLICATION_COMMAND) {
         const { name, options } = data;
 
-        // Complete
-
         if (name === 'react') {
             const emojis = client.guilds.cache.get($PUBLIC_GUILD_ID).emojis.cache.map(emoji => emoji.toString());
 
@@ -38,8 +36,6 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
             });
         }
 
-        // Temporarily Complete
-
         if (name === 'fact') {
             const data = await fetch(`http://${process.env.DB_HOST}:3333/router/fact/get`, {
                 method: "GET"
@@ -49,7 +45,16 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
             return res.send({
                 type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                 data: {
-                    content: `Did you know! ${response[Math.floor(Math.random() * response.length)].data}`,
+                    embeds: [
+                        {
+                            title: `Did you know!`,
+                            description: `${response[Math.floor(Math.random() * response.length)].data}`,
+                            color: 0x0099ff,
+                            fields: [
+                                { name: "ID", value: `**${quote.quote_id}**`, inline: true }
+                            ],
+                        }
+                    ]
                 },
             });
         }
@@ -85,8 +90,6 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                     }
                 }
             }
-
-            // Incomplete
             
             if (!quote)
                 return res.status(400).json({ error: 'Error resolving the request' });
@@ -153,6 +156,78 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                     type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                     data: {
                         content: `Quote successfully added.`,
+                    },
+                });
+            }
+
+            return res.send({
+                type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                data: {
+                    content: `Database insertion failed.`,
+                },
+            });
+        }
+
+        if (name === 'gif-add') {
+            const data = options?.find(opt => opt.name === 'data')?.value;
+
+            if (!data) {
+                return res.send({
+                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data: {
+                        content: `All details need to be specified.`,
+                    },
+                });
+            }
+
+            const query = await fetch(`http://${process.env.DB_HOST}:3333/router/gif/add`, {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ data })
+            });
+            const response = await query.json();
+
+            if (response.affectedRows > 0) {
+                return res.send({
+                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data: {
+                        content: `Gif successfully added.`,
+                    },
+                });
+            }
+
+            return res.send({
+                type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                data: {
+                    content: `Database insertion failed.`,
+                },
+            });
+        }
+
+        if (name === 'fact-add') {
+            const data = options?.find(opt => opt.name === 'data')?.value;
+
+            if (!data) {
+                return res.send({
+                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data: {
+                        content: `All details need to be specified.`,
+                    },
+                });
+            }
+
+            const query = await fetch(`http://${process.env.DB_HOST}:3333/router/fact/add`, {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ data })
+            });
+            const response = await query.json();
+
+            if (response.affectedRows > 0) {
+                return res.send({
+                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data: {
+                        content: `Fact successfully added.`,
                     },
                 });
             }
