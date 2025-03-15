@@ -136,6 +136,51 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
             });
         }
 
+        if (name === 'gif-debug') {
+            const data = await fetch(`http://${process.env.DB_HOST}:3333/router/gif/get`, {
+                method: "GET"
+            });
+            const response = await data.json();
+            let gifs = response.map(gif => gif.gif_id + ': ' + gif.data );
+
+            return res.send({
+                type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                data: {
+                    content: `${gifs.join('\n')}`,
+                },
+            });
+        }
+        
+        if (name === 'quote-debug') {
+            const data = await fetch(`http://${process.env.DB_HOST}:3333/router/quote/get`, {
+                method: "GET"
+            });
+            const response = await data.json();
+            let quotes = response.map(quote => quote.quote_id + ': ' + quote.data + ' - ' + quote.quoted + '. By ' + quote.quoted_by + ' playing ' + quote.game + ' at ' + quote.date );
+
+            return res.send({
+                type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                data: {
+                    content: `${quotes.join('\n')}`,
+                },
+            });
+        }
+        
+        if (name === 'fact-debug') {
+            const data = await fetch(`http://${process.env.DB_HOST}:3333/router/fact/get`, {
+                method: "GET"
+            });
+            const response = await data.json();
+            let facts = response.map(fact => fact.fact_id + ': ' + fact.data );
+
+            return res.send({
+                type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                data: {
+                    content: `${fact.join('\n')}`,
+                },
+            });
+        }
+
         if (name === 'quote-add') {
             const data = options?.find(opt => opt.name === 'data')?.value;
             const quoted = options?.find(opt => opt.name === 'quoted')?.value;
