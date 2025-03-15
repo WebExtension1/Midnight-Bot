@@ -51,9 +51,14 @@ const QUOTE = {
 const FACT = {
   name: 'fact',
   description: 'Did you know?',
-  type: 1,
-  integration_types: [0, 1],
-  contexts: [0, 1, 2],
+  options: [
+    {
+      name: "id",
+      description: "(Optional) ID of the fact.",
+      type: 4,
+      required: false
+    }
+  ]
 }
 
 const GIF = {
