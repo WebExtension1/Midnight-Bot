@@ -101,4 +101,4 @@ const QUOTE_ADD = {
 
 const ALL_PRIVATE_COMMANDS = [QUOTE_ADD];
 
-InstallGuildCommands(process.env.APP_ID, process.env.GUILD_ID, ALL_PRIVATE_COMMANDS);
+InstallGuildCommands(process.env.APP_ID, process.env.PRIVATE_GUILD_ID, ALL_PRIVATE_COMMANDS);

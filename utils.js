@@ -48,6 +48,18 @@ export async function InstallGuildCommands(appId, guildID, commands) {
   }
 }
 
+export function formatDate(inputDate) {
+  const date = new Date(inputDate);
+
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const day = date.getDate();
+  const month = date.getMonth() + 1;
+  const year = date.getFullYear();
+
+  return `${day}/${month}/${year} at ${hours}:${minutes}`;
+}
+
 export function capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }

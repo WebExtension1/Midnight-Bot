@@ -5,6 +5,7 @@ import {
     verifyKeyMiddleware,
 } from 'discord-interactions';
 import { client } from './app.js';
+import { formatDate } from './utils.js';
 
 const router = express.Router();
 
@@ -18,7 +19,7 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
         // Complete
 
         if (name === 'react') {
-            const emojis = client.guilds.cache.get("1171075530481737779").emojis.cache.map(emoji => emoji.toString());
+            const emojis = client.guilds.cache.get($PUBLIC_GUILD_ID).emojis.cache.map(emoji => emoji.toString());
 
             return res.send({
                 type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
@@ -39,7 +40,6 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
 
         // Temporarily Complete
 
-        // Needs frontend
         if (name === 'fact') {
             const data = await fetch(`http://${process.env.DB_HOST}:3333/router/fact/get`, {
                 method: "GET"
@@ -52,22 +52,6 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                     content: `Did you know! ${response[Math.floor(Math.random() * response.length)].data}`,
                 },
             });
-        }
-
-        // Incomplete
-
-        // Needs to be in db
-
-        function formatDate(inputDate) {
-            const date = new Date(inputDate);
-        
-            const hours = String(date.getHours()).padStart(2, '0');
-            const minutes = String(date.getMinutes()).padStart(2, '0');
-            const day = date.getDate();
-            const month = date.getMonth() + 1;
-            const year = date.getFullYear();
-        
-            return `${day}/${month}/${year} at ${hours}:${minutes}`;
         }
 
         if (name === 'quote') {
@@ -94,16 +78,15 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                         (!game || quote.game === game)
                     );
 
-                    if (!quotes) {
-                        message = "We couldn't find a quote matching that criteria, so here's a random one!";
-                    }
-                    else if (quotes.length > 0) {
+                    if (quotes.length > 0) {
                         quote = quotes[Math.floor(Math.random() * quotes.length)];
                     } else {
                         message = "We couldn't find a quote matching that criteria, so here's a random one!";
                     }
                 }
             }
+
+            // Incomplete
             
             if (!quote)
                 return res.status(400).json({ error: 'Error resolving the request' });

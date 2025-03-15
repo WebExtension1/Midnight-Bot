@@ -26,7 +26,7 @@ client.once('ready', () => {
     activities: [{
       name: 'Eating Cat Treats',
       type: 4,
-      emoji: { name: "CatTreat", id: 1349755255675556080, },
+      // emoji: { name: "CatTreat", id: 1349755255675556080, },
       state: "🐱 Eating Cat Treats",
     }],
     status: 'online',
