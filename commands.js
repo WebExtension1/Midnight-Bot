@@ -72,9 +72,14 @@ const GIF = {
 const STATS = {
   name: 'stats',
   description: 'Get your usage stats',
-  type: 1,
-  integration_types: [0, 1],
-  contexts: [0, 1, 2],
+  options: [
+    {
+      name: "server",
+      description: "(Optional). True for server stats. False/empty for yours",
+      type: 5,
+      required: false
+    }
+  ]
 }
 
 const ALL_COMMANDS = [REACT, QUOTE, LINKTREE, FACT, GIF, STATS];

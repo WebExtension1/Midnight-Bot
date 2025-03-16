@@ -57,16 +57,44 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
 
         if (name === 'stats') {
             try {
-                const sender_id = member.user.id;
-                const details = JSON.parse(fs.readFileSync(usageFile, 'utf8'));
-                const response = details[sender_id];
+                let server = false;
+                if (options && options?.find(opt => opt.name === 'server')?.value === true) {
+                    server = true;
+                }
+
+                const response = {};
+                if (server) {
+                    const details = JSON.parse(fs.readFileSync(usageFile, 'utf8'));
+                    response = {
+                        fact: 0,
+                        react: 0,
+                        quote: 0,
+                        gif: 0,
+                        linktree: 0,
+                        stats: 0,
+                    };
+                
+                    for (const userId in details) {
+                        const userStats = details[userId];
+                        response.fact += userStats.fact || 0;
+                        response.react += userStats.react || 0;
+                        response.quote += userStats.quote || 0;
+                        response.gif += userStats.gif || 0;
+                        response.linktree += userStats.linktree || 0;
+                        response.stats += userStats.stats || 0;
+                    }
+                } else {
+                    const sender_id = member.user.id;
+                    const details = JSON.parse(fs.readFileSync(usageFile, 'utf8'));
+                    response = details[sender_id];
+                }
 
                 return res.send({
                     type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                     data: {
                         embeds: [
                             {
-                                title: `Midnight command stats`,
+                                title: `Midnight command stats for ${server ? "the server" : member.user.username}.`,
                                 description: `
                                     /fact: ${response["fact"] || 0}
                                     /react: ${response["react"] || 0}
