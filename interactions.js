@@ -35,6 +35,78 @@ function trackCommandUsage(userId, commandName) {
 router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (req, res) {
     const { type, data, guild_id, member } = req.body;
 
+    const getPaginatedItem = async (type, pagination_amount, page, returnType) => {
+        try {
+            const data = await fetch(`http://${process.env.DB_HOST}:3333/router/${type}/get`, {
+                method: "GET"
+            });
+            const response = await data.json();
+            let items = null;
+            
+            const pages = Math.ceil(response.length / pagination_amount);
+            if (page < 1) {
+                page = 1;
+            } else if (page > pages) {
+                page = pages;
+            }
+
+            switch (type) {
+                case 'gif':
+                    items = response.filter(gif => gif.gif_id > ((page - 1) * pagination_amount) && gif.gif_id <= (page * pagination_amount)).map(gif => gif.gif_id + ': ' + gif.data);
+                    break;
+                case 'quote':
+                    items = response.filter(quote => quote.quote_id > ((page - 1) * pagination_amount) && quote.quote_id <= (page * pagination_amount)).map(quote => `${quote.quote_id}: ${quote.data} - ${quote.quoted}.\nBy **${quote.user}** playing **${quote.game}** at **${formatDate(quote.date)}**\n`);
+                    break;
+                case 'fact':
+                    items = response.filter(fact => fact.fact_id > ((page - 1) * pagination_amount) && fact.fact_id <= (page * pagination_amount)).map(fact => fact.fact_id + ': ' + fact.data);
+                    break;
+            }
+
+            if (items.length === 0) {
+                return res.send({
+                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data: {
+                        content: `No ${type}s found for the given page.`,
+                    },
+                });
+            }
+
+            return res.send({
+                type: returnType,
+                data: {
+                    content: `${items.join('\n')}\n\n Page ${page} of ${pages}`,
+                    components: [
+                        {
+                            type: 1,
+                            components: [
+                                {
+                                    type: 2,
+                                    label: "<--",
+                                    style: 1,
+                                    custom_id: `back_${type}_${page}`,
+                                },
+                                {
+                                    type: 2,
+                                    label: "-->",
+                                    style: 1,
+                                    custom_id: `next_${type}_${page}`,
+                                }
+                            ]
+                        }
+                    ]
+                },
+            })
+        }
+        catch (error) {
+            return res.send({
+                type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                data: {
+                    content: `Error: ${error}`,
+                },
+            });
+        }
+    }
+
     if (type === InteractionType.MESSAGE_COMPONENT) {
         const custom_id = data.custom_id;
 
@@ -44,11 +116,11 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
         let page = items[2];
         let pagination = 25;
 
-        if (direction == 'next') {
+        if (direction === 'next') {
             page++;
         } else {
             page--;
-            if (page < 0)
+            if (page <= 0)
                 page = 1;
         }
 
@@ -57,7 +129,17 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
         else if (type === 'fact')
             pagination = 20;
 
-        getPaginatedItem(type, pagination, page, InteractionResponseType.UPDATE_MESSAGE);
+        try {
+            getPaginatedItem(type, pagination, page, InteractionResponseType.UPDATE_MESSAGE);
+        }
+        catch (error) {
+            return res.send({
+                type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                data: {
+                    content: `Error: ${error}`,
+                },
+            });
+        }
     }
 
     if (type === InteractionType.APPLICATION_COMMAND) {
@@ -314,65 +396,13 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
             }
         }
 
-        const getPaginatedItem = async (type, pagination_amount, page, returnType) => {
+        if (name === 'gif-debug') {
             try {
-                const data = await fetch(`http://${process.env.DB_HOST}:3333/router/${type}/get`, {
-                    method: "GET"
-                });
-                const response = await data.json();
-                let items = null;
-
-                switch (type) {
-                    case 'gif':
-                        items = response.filter(gif => gif.gif_id > ((page - 1) * pagination_amount) && gif.gif_id <= (page * pagination_amount)).map(gif => gif.gif_id + ': ' + gif.data);
-                        break;
-                    case 'quote':
-                        items = response.filter(quote => quote.quote_id > ((page - 1) * pagination_amount) && quote.quote_id <= (page * pagination_amount)).map(quote => `${quote.quote_id}: ${quote.data} - ${quote.quoted}.\nBy **${quote.user}** playing **${quote.game}** at **${formatDate(quote.date)}**\n`);
-                        break;
-                    case ' fact':
-                        items = response.filter(fact => fact.fact_id > ((page - 1) * pagination_amount) && fact.fact_id <= (page * pagination_amount)).map(fact => fact.fact_id + ': ' + fact.data);
-                        break;
-                }
-
-                if (items.length === 0) {
-                    const pages = Math.ceil(response.length / pagination_amount);
-                    return res.send({
-                        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-                        data: {
-                            content: `Pagination was outside the scope of the array. There are ${response.length} ${type}s in the db and pagination is set to ${pagination_amount}, so there are ${pages} page${pages !== 1 && 's'}.`,
-                        },
-                    });
-                }
-
-                return res.send({
-                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-                    data: {
-                        content: `${gifs.join('\n')}`,
-                        components: [
-                            {
-                                type: 1,
-                                components: [
-                                    {
-                                        type: 2,
-                                        label: "<--",
-                                        style: 1,
-                                        custom_id: `back_${type}_${page}`,
-                                    },
-                                    {
-                                        type: 2,
-                                        label: "-->",
-                                        style: 1,
-                                        custom_id: `next_${type}`,
-                                    }
-                                ]
-                            }
-                        ]
-                    },
-                })
+                await getPaginatedItem('gif', 25, options?.find(opt => opt.name === 'pagination')?.value || 1, InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE);
             }
             catch (error) {
                 return res.send({
-                    type: returnType,
+                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                     data: {
                         content: `Error: ${error}`,
                     },
@@ -380,16 +410,32 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
             }
         }
 
-        if (name === 'gif-debug') {
-            getPaginatedItem('gif', 25, options?.find(opt => opt.name === 'pagination')?.value || 1, InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE);
-        }
-
         if (name === 'quote-debug') {
-            getPaginatedItem('quote', 10, options?.find(opt => opt.name === 'pagination')?.value || 1, InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE);
+            try {
+                await getPaginatedItem('quote', 10, options?.find(opt => opt.name === 'pagination')?.value || 1, InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE);
+            }
+            catch (error) {
+                return res.send({
+                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data: {
+                        content: `Error: ${error}`,
+                    },
+                });
+            }
         }
 
         if (name === 'fact-debug') {
-            getPaginatedItem('fact', 20, options?.find(opt => opt.name === 'pagination')?.value || 1, InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE);
+            try {
+                await getPaginatedItem('fact', 20, options?.find(opt => opt.name === 'pagination')?.value || 1, InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE);
+            }
+            catch (error) {
+                return res.send({
+                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data: {
+                        content: `Error: ${error}`,
+                    },
+                });
+            }
         }
 
         if (name === 'gif-add') {
@@ -770,12 +816,12 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
             }
         }
 
-        console.error(`unknown command: ${name}`);
-        return res.status(400).json({ error: 'unknown command' });
+        // console.error(`unknown command: ${name}`);
+        // return res.status(400).json({ error: 'unknown command' });
     }
 
-    console.error('unknown interaction type', type);
-    return res.status(400).json({ error: 'unknown interaction type' });
+    // console.error('unknown interaction type', type);
+    // return res.status(400).json({ error: 'unknown interaction type' });
 });
 
 export default router;
