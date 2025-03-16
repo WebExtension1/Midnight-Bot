@@ -1,4 +1,5 @@
 import express from "express";
+import fs from "fs";
 import {
     InteractionResponseType,
     InteractionType,
@@ -25,13 +26,14 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
     const { type, data } = req.body;
 
     if (type === InteractionType.APPLICATION_COMMAND) {
-        const { name, options } = data;
+        const { name, options, guild_id } = data;
 
-        trackCommandUsage(name);
+        if (guild_id === process.env.PUBLIC_GUILD_ID)
+            trackCommandUsage(name);
 
         if (name === 'react') {
             try {
-                const emojis = client.guilds.cache.get($PUBLIC_GUILD_ID).emojis.cache.map(emoji => emoji.toString());
+                const emojis = client.guilds.cache.get(process.env.PUBLIC_GUILD_ID).emojis.cache.map(emoji => emoji.toString());
 
                 return res.send({
                     type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
