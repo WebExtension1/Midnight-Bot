@@ -96,12 +96,12 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                             {
                                 title: `Midnight command stats for ${server ? "the server" : member.user.username}.`,
                                 description: `
-                                    /fact: ${response["fact"] || 0}
-                                    /react: ${response["react"] || 0}
-                                    /quote: ${response["quote"] || 0}
-                                    /gif: ${response["gif"] || 0}
-                                    /stats: ${response["stats"] || 0}
-                                    /linktree: ${response["linktree"] || 0}
+/fact: ${response["fact"] || 0}
+/react: ${response["react"] || 0}
+/quote: ${response["quote"] || 0}
+/gif: ${response["gif"] || 0}
+/stats: ${response["stats"] || 0}
+/linktree: ${response["linktree"] || 0}
                                 `,
                                 color: 0x0099ff,
                             }
@@ -582,12 +582,12 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
             try {
                 const id = options?.find(opt => opt.name === 'id')?.value;
                 const data = options?.find(opt => opt.name === 'data')?.value;
-                const quote = options?.find(opt => opt.name === 'quote')?.value;
+                const quoted = options?.find(opt => opt.name === 'quoted')?.value;
                 const quoted_by = options?.find(opt => opt.name === 'quoted_by')?.value;
                 const game = options?.find(opt => opt.name === 'game')?.value;
                 const date = options?.find(opt => opt.name === 'date')?.value;
     
-                if (!data && !quote && !quoted_by && !game && !date)
+                if (!data && !quoted && !quoted_by && !game && !date)
                     return res.send({
                         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                         data: {
@@ -598,7 +598,7 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                 const query = await fetch(`http://${process.env.DB_HOST}:3333/router/quote/update`, {
                     method: "POST",
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id, data, quote, user: quoted_by, game, date })
+                    body: JSON.stringify({ id, data, quoted, user: quoted_by, game, date })
                 });
                 const response = await query.json();
     

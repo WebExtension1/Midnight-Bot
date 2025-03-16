@@ -36,29 +36,38 @@ router.post("/update", async (req, res, next) => {
     try {
         const { id, data, quoted, user, game, date } = req.body;
         
+        let updates = [];
         let params = [];
-        if (data)
+
+        if (data) {
+            updates.push('data = ?');
             params.push(data);
-        if (quoted)
+        }
+        if (quoted) {
+            updates.push('quoted = ?');
             params.push(quoted);
-        if (user)
+        }
+        if (user) {
+            updates.push('user = ?');
             params.push(user);
-        if (game)
+        }
+        if (game) {
+            updates.push('game = ?');
             params.push(game);
-        if (date)
+        }
+        if (date) {
+            updates.push('date = ?');
             params.push(date);
+        }
         params.push(id);
 
-        const [result] = await pool.execute(`
-            UPDATE quote
-            SET
-            ${data && 'data = ?'}
-            ${quoted && 'quoted = ?'}
-            ${user && 'user = ?'}
-            ${game && 'game = ?'}
-            ${date && 'date = ?'}
+        const query = `
+            UPDATE quotes
+            SET ${updates.join(", ")}
             WHERE quote_id = ?
-        `, [params]);
+        `;
+
+        const [result] = await pool.execute(query, params);
 
         res.json({ message: "Quote updated", affectedRows: result.affectedRows });
     }
@@ -73,7 +82,7 @@ router.post("/delete", async (req, res, next) => {
 
         const [result] = await pool.execute(`
             DELETE FROM quotes
-            WHERE quotes_id = ?
+            WHERE quote_id = ?
         `, [id]);
 
         res.json({ message: "Quote deleted", affectedRows: result.affectedRows });
