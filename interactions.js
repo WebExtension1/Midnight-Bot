@@ -12,24 +12,34 @@ const router = express.Router();
 
 const usageFile = process.env.USAGE_FILE;
 
-const commandUsage = fs.existsSync(usageFile)
-    ? JSON.parse(fs.readFileSync(usageFile, "utf-8"))
-    : {};
+let commandStats = {};
+if (fs.existsSync(usageFile)) {
+    commandStats = JSON.parse(fs.readFileSync(usageFile, 'utf8'));
+} else {
+    fs.writeFileSync(usageFile, JSON.stringify(commandStats), 'utf8');
+}
 
-function trackCommandUsage(commandName) {
-    commandUsage[commandName] = (commandUsage[commandName] || 0) + 1;
-    fs.writeFileSync(usageFile, JSON.stringify(commandUsage, null, 2));
+function trackCommandUsage(userId, commandName) {
+    if (!commandStats[userId]) {
+        commandStats[userId] = {};
+    }
+
+    if (!commandStats[userId][commandName]) {
+        commandStats[userId][commandName] = 0;
+    }
+    commandStats[userId][commandName]++;
+
+    fs.writeFileSync(usageFile, JSON.stringify(commandStats), 'utf8');
 }
 
 router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (req, res) {
-    // Interaction id, type and data
-    const { type, data } = req.body;
+    const { type, data, guild_id, member } = req.body;
 
     if (type === InteractionType.APPLICATION_COMMAND) {
-        const { name, options, guild_id } = data;
+        const { name, options } = data;
 
         if (guild_id === process.env.PUBLIC_GUILD_ID)
-            trackCommandUsage(name);
+            trackCommandUsage(member.user.id, name);
 
         if (name === 'react') {
             try {
