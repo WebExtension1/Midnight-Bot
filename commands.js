@@ -69,7 +69,15 @@ const GIF = {
   contexts: [0, 1, 2],
 }
 
-const ALL_COMMANDS = [REACT, QUOTE, LINKTREE, FACT, GIF];
+const STATS = {
+  name: 'stats',
+  description: 'Get your usage stats',
+  type: 1,
+  integration_types: [0, 1],
+  contexts: [0, 1, 2],
+}
+
+const ALL_COMMANDS = [REACT, QUOTE, LINKTREE, FACT, GIF, STATS];
 
 InstallGlobalCommands(process.env.APP_ID, ALL_COMMANDS);
 

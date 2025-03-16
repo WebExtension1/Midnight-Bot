@@ -41,6 +41,55 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
         if (guild_id === process.env.PUBLIC_GUILD_ID)
             trackCommandUsage(member.user.id, name);
 
+        if (name === 'example') {
+            try {
+
+            }
+            catch (error) {
+                return res.send({
+                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data: {
+                        content: `Error: ${error}`,
+                    },
+                });
+            }
+        }
+
+        if (name === 'stats') {
+            try {
+                const sender_id = member.user.id;
+                const details = JSON.parse(fs.readFileSync(usageFile, 'utf8'));
+                const response = details[sender_id];
+
+                return res.send({
+                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data: {
+                        embeds: [
+                            {
+                                title: `Midnight command stats`,
+                                description: `
+                                    /fact: ${response["fact"]}
+                                    /react: ${response["react"]}
+                                    /quote: ${response["quote"]}
+                                    /gif: ${response["gif"]}
+                                    /linktree: ${response["linktree"]}
+                                `,
+                                color: 0x0099ff,
+                            }
+                        ]
+                    },
+                });
+            }
+            catch (error) {
+                return res.send({
+                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data: {
+                        content: `Error: ${error}`,
+                    },
+                });
+            }
+        }
+
         if (name === 'react') {
             try {
                 const emojis = client.guilds.cache.get(process.env.PUBLIC_GUILD_ID).emojis.cache.map(emoji => emoji.toString());
