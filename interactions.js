@@ -9,12 +9,25 @@ import { formatDate } from './utils.js';
 
 const router = express.Router();
 
+const usageFile = process.env.USAGE_FILE;
+
+const commandUsage = fs.existsSync(usageFile)
+    ? JSON.parse(fs.readFileSync(usageFile, "utf-8"))
+    : {};
+
+function trackCommandUsage(commandName) {
+    commandUsage[commandName] = (commandUsage[commandName] || 0) + 1;
+    fs.writeFileSync(usageFile, JSON.stringify(commandUsage, null, 2));
+}
+
 router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (req, res) {
     // Interaction id, type and data
-    const { id, type, data } = req.body;
+    const { type, data } = req.body;
 
     if (type === InteractionType.APPLICATION_COMMAND) {
         const { name, options } = data;
+
+        trackCommandUsage(name);
 
         if (name === 'react') {
             try {
