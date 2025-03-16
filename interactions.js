@@ -45,9 +45,9 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
             
             const pages = Math.ceil(response.length / pagination_amount);
             if (page < 1) {
-                page = 1;
-            } else if (page > pages) {
                 page = pages;
+            } else if (page > pages) {
+                page = 1;
             }
 
             switch (type) {
@@ -81,15 +81,27 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                             components: [
                                 {
                                     type: 2,
+                                    label: "<<-",
+                                    style: 1,
+                                    custom_id: `back2_${type}_${page}`,
+                                },
+                                {
+                                    type: 2,
                                     label: "<--",
                                     style: 1,
-                                    custom_id: `back_${type}_${page}`,
+                                    custom_id: `back1_${type}_${page}`,
                                 },
                                 {
                                     type: 2,
                                     label: "-->",
                                     style: 1,
-                                    custom_id: `next_${type}_${page}`,
+                                    custom_id: `next1_${type}_${page}`,
+                                },
+                                {
+                                    type: 2,
+                                    label: "->>",
+                                    style: 1,
+                                    custom_id: `next2_${type}_${page}`,
                                 }
                             ]
                         }
@@ -116,12 +128,14 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
         let page = items[2];
         let pagination = 25;
 
-        if (direction === 'next') {
+        if (direction === 'next1') {
             page++;
-        } else {
+        } else if (direction === 'back1') {
             page--;
-            if (page <= 0)
-                page = 1;
+        } else if (direction === 'next2') {
+            page = 0;
+        } else {
+            page = 1000000;
         }
 
         if (type === 'quote')
