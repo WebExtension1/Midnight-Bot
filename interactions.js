@@ -68,11 +68,12 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                             {
                                 title: `Midnight command stats`,
                                 description: `
-                                    /fact: ${response["fact"]}
-                                    /react: ${response["react"]}
-                                    /quote: ${response["quote"]}
-                                    /gif: ${response["gif"]}
-                                    /linktree: ${response["linktree"]}
+                                    /fact: ${response["fact"] || 0}
+                                    /react: ${response["react"] || 0}
+                                    /quote: ${response["quote"] || 0}
+                                    /gif: ${response["gif"] || 0}
+                                    /linktree: ${response["linktree"] || 0}
+                                    /stats: ${response["stats"] || 0}
                                 `,
                                 color: 0x0099ff,
                             }
