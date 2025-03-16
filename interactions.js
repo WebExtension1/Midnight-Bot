@@ -32,6 +32,21 @@ function trackCommandUsage(userId, commandName) {
     fs.writeFileSync(usageFile, JSON.stringify(commandStats), 'utf8');
 }
 
+client.on('interactionCreate', async (interaction) => {
+    if (!interaction.isButton()) return;
+
+    if (interaction.customId === 'back_gif') {
+        await interaction.update({
+            content: "Test back",
+        });
+    } else if (interaction.customId === 'next_gif') {
+        await interaction.update({
+            content: "Test forward",
+        });
+    }
+});
+
+
 router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (req, res) {
     const { type, data, guild_id, member } = req.body;
 
@@ -297,21 +312,43 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                 const response = await data.json();
 
                 const page = options?.find(opt => opt.name === 'pagination')?.value;
+                const pagination_amount = 25;
 
-                const gifs = response.filter(gif => gif.gif_id > ((page - 1) * 25) && gif.gif_id <= (page * 25)).map(gif => gif.gif_id + ': ' + gif.data);
+                const gifs = response.filter(gif => gif.gif_id > ((page - 1) * pagination_amount) && gif.gif_id <= (page * pagination_amount)).map(gif => gif.gif_id + ': ' + gif.data);
 
-                if (!gifs)
+                if (gifs.length === 0) {
+                    const pages = Math.ceil(response.length / pagination_amount);
                     return res.send({
                         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                         data: {
-                            content: `Pagination was outside the scope of the array. There are ${response.length} gifs in the db.`,
+                            content: `Pagination was outside the scope of the array. There are ${response.length} gifs in the db and pagination is set to ${pagination_amount}, so there are ${pages} page${pages !== 1 && 's'}.`,
                         },
                     });
+                }
 
                 return res.send({
                     type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                     data: {
                         content: `${gifs.join('\n')}`,
+                        components: [
+                            {
+                                type: 1,
+                                components: [
+                                    {
+                                        type: 2,
+                                        label: "<--",
+                                        style: 1,
+                                        custom_id: "back_page",
+                                    },
+                                    {
+                                        type: 2,
+                                        label: "-->",
+                                        style: 1,
+                                        custom_id: "next_page",
+                                    }
+                                ]
+                            }
+                        ]
                     },
                 });
             }
@@ -333,17 +370,19 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                 const response = await data.json();
     
                 const page = options?.find(opt => opt.name === 'pagination')?.value;
+                const pagination_amount = 10;
     
-                const quotes = response.filter(quote => quote.quote_id > ((page - 1) * 10) && quote.quote_id <= (page * 10)).map(quote => `${quote.quote_id}: ${quote.data} - ${quote.quoted}.\nBy **${quote.user}** playing **${quote.game}** at **${formatDate(quote.date)}**\n`);
+                const quotes = response.filter(quote => quote.quote_id > ((page - 1) * pagination_amount) && quote.quote_id <= (page * pagination_amount)).map(quote => `${quote.quote_id}: ${quote.data} - ${quote.quoted}.\nBy **${quote.user}** playing **${quote.game}** at **${formatDate(quote.date)}**\n`);
     
-                if (!quotes)
+                if (!quotes) {
+                    const pages = Math.ceil(response.length / pagination_amount);
                     return res.send({
                         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                         data: {
-                            content: `Pagination was outside the scope of the array. There are ${response.length} gifs in the db.`,
+                            content: `Pagination was outside the scope of the array. There are ${response.length} gifs in the db and pagination is set to ${pagination_amount}, so there are ${pages} page${pages !== 1 && 's'}.`,
                         },
                     });
-    
+                }
     
                 return res.send({
                     type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
@@ -370,18 +409,20 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                 const response = await data.json();
     
                 const page = options?.find(opt => opt.name === 'pagination')?.value;
+                const pagination_amount = 20;
     
-                const facts = response.filter(fact => fact.fact_id > ((page - 1) * 20) && fact.fact_id <= (page * 20)).map(fact => fact.fact_id + ': ' + fact.data);
+                const facts = response.filter(fact => fact.fact_id > ((page - 1) * pagination_amount) && fact.fact_id <= (page * pagination_amount)).map(fact => fact.fact_id + ': ' + fact.data);
     
-                if (!facts)
+                if (facts.length === 0) {
+                    const pages = Math.ceil(response.length / pagination_amount);
                     return res.send({
                         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                         data: {
-                            content: `Pagination was outside the scope of the array. There are ${response.length} gifs in the db.`,
+                            content: `Pagination was outside the scope of the array. There are ${response.length} gifs in the db and pagination is set to ${pagination_amount}, so there are ${pages} page${pages !== 1 && 's'}.`,
                         },
                     });
-    
-    
+                }
+
                 return res.send({
                     type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                     data: {
