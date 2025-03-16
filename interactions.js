@@ -32,23 +32,33 @@ function trackCommandUsage(userId, commandName) {
     fs.writeFileSync(usageFile, JSON.stringify(commandStats), 'utf8');
 }
 
-client.on('interactionCreate', async (interaction) => {
-    if (!interaction.isButton()) return;
-
-    if (interaction.customId === 'back_gif') {
-        await interaction.update({
-            content: "Test back",
-        });
-    } else if (interaction.customId === 'next_gif') {
-        await interaction.update({
-            content: "Test forward",
-        });
-    }
-});
-
-
 router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (req, res) {
     const { type, data, guild_id, member } = req.body;
+
+    if (type === InteractionType.MESSAGE_COMPONENT) {
+        const custom_id = data.custom_id;
+
+        const items = custom_id.split('_');
+        const direction = items[0];
+        const type = items[1];
+        let page = items[2];
+        let pagination = 25;
+
+        if (direction == 'next') {
+            page++;
+        } else {
+            page--;
+            if (page < 0)
+                page = 1;
+        }
+
+        if (type === 'quote')
+            pagination = 10;
+        else if (type === 'fact')
+            pagination = 20;
+
+        getPaginatedItem(type, pagination, page, InteractionResponseType.UPDATE_MESSAGE);
+    }
 
     if (type === InteractionType.APPLICATION_COMMAND) {
         const { name, options } = data;
@@ -88,7 +98,7 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                         linktree: 0,
                         stats: 0,
                     };
-                
+
                     for (const userId in details) {
                         const userStats = details[userId];
                         response.fact += userStats.fact || 0;
@@ -304,24 +314,32 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
             }
         }
 
-        if (name === 'gif-debug') {
+        const getPaginatedItem = async (type, pagination_amount, page, returnType) => {
             try {
-                const data = await fetch(`http://${process.env.DB_HOST}:3333/router/gif/get`, {
+                const data = await fetch(`http://${process.env.DB_HOST}:3333/router/${type}/get`, {
                     method: "GET"
                 });
                 const response = await data.json();
+                let items = null;
 
-                const page = options?.find(opt => opt.name === 'pagination')?.value;
-                const pagination_amount = 25;
+                switch (type) {
+                    case 'gif':
+                        items = response.filter(gif => gif.gif_id > ((page - 1) * pagination_amount) && gif.gif_id <= (page * pagination_amount)).map(gif => gif.gif_id + ': ' + gif.data);
+                        break;
+                    case 'quote':
+                        items = response.filter(quote => quote.quote_id > ((page - 1) * pagination_amount) && quote.quote_id <= (page * pagination_amount)).map(quote => `${quote.quote_id}: ${quote.data} - ${quote.quoted}.\nBy **${quote.user}** playing **${quote.game}** at **${formatDate(quote.date)}**\n`);
+                        break;
+                    case ' fact':
+                        items = response.filter(fact => fact.fact_id > ((page - 1) * pagination_amount) && fact.fact_id <= (page * pagination_amount)).map(fact => fact.fact_id + ': ' + fact.data);
+                        break;
+                }
 
-                const gifs = response.filter(gif => gif.gif_id > ((page - 1) * pagination_amount) && gif.gif_id <= (page * pagination_amount)).map(gif => gif.gif_id + ': ' + gif.data);
-
-                if (gifs.length === 0) {
+                if (items.length === 0) {
                     const pages = Math.ceil(response.length / pagination_amount);
                     return res.send({
                         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                         data: {
-                            content: `Pagination was outside the scope of the array. There are ${response.length} gifs in the db and pagination is set to ${pagination_amount}, so there are ${pages} page${pages !== 1 && 's'}.`,
+                            content: `Pagination was outside the scope of the array. There are ${response.length} ${type}s in the db and pagination is set to ${pagination_amount}, so there are ${pages} page${pages !== 1 && 's'}.`,
                         },
                     });
                 }
@@ -338,112 +356,46 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                                         type: 2,
                                         label: "<--",
                                         style: 1,
-                                        custom_id: "back_page",
+                                        custom_id: `back_${type}_${page}`,
                                     },
                                     {
                                         type: 2,
                                         label: "-->",
                                         style: 1,
-                                        custom_id: "next_page",
+                                        custom_id: `next_${type}`,
                                     }
                                 ]
                             }
                         ]
                     },
-                });
+                })
             }
             catch (error) {
                 return res.send({
-                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    type: returnType,
                     data: {
                         content: `Error: ${error}`,
                     },
                 });
             }
+        }
+
+        if (name === 'gif-debug') {
+            getPaginatedItem('gif', 25, options?.find(opt => opt.name === 'pagination')?.value || 1, InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE);
         }
 
         if (name === 'quote-debug') {
-            try {
-                const data = await fetch(`http://${process.env.DB_HOST}:3333/router/quote/get`, {
-                    method: "GET"
-                });
-                const response = await data.json();
-    
-                const page = options?.find(opt => opt.name === 'pagination')?.value;
-                const pagination_amount = 10;
-    
-                const quotes = response.filter(quote => quote.quote_id > ((page - 1) * pagination_amount) && quote.quote_id <= (page * pagination_amount)).map(quote => `${quote.quote_id}: ${quote.data} - ${quote.quoted}.\nBy **${quote.user}** playing **${quote.game}** at **${formatDate(quote.date)}**\n`);
-    
-                if (!quotes) {
-                    const pages = Math.ceil(response.length / pagination_amount);
-                    return res.send({
-                        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-                        data: {
-                            content: `Pagination was outside the scope of the array. There are ${response.length} gifs in the db and pagination is set to ${pagination_amount}, so there are ${pages} page${pages !== 1 && 's'}.`,
-                        },
-                    });
-                }
-    
-                return res.send({
-                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-                    data: {
-                        content: `${quotes.join('\n')}`,
-                    },
-                });
-            }
-            catch (error) {
-                return res.send({
-                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-                    data: {
-                        content: `Error: ${error}`,
-                    },
-                });
-            }
+            getPaginatedItem('quote', 10, options?.find(opt => opt.name === 'pagination')?.value || 1, InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE);
         }
 
         if (name === 'fact-debug') {
-            try {
-                const data = await fetch(`http://${process.env.DB_HOST}:3333/router/fact/get`, {
-                    method: "GET"
-                });
-                const response = await data.json();
-    
-                const page = options?.find(opt => opt.name === 'pagination')?.value;
-                const pagination_amount = 20;
-    
-                const facts = response.filter(fact => fact.fact_id > ((page - 1) * pagination_amount) && fact.fact_id <= (page * pagination_amount)).map(fact => fact.fact_id + ': ' + fact.data);
-    
-                if (facts.length === 0) {
-                    const pages = Math.ceil(response.length / pagination_amount);
-                    return res.send({
-                        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-                        data: {
-                            content: `Pagination was outside the scope of the array. There are ${response.length} gifs in the db and pagination is set to ${pagination_amount}, so there are ${pages} page${pages !== 1 && 's'}.`,
-                        },
-                    });
-                }
-
-                return res.send({
-                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-                    data: {
-                        content: `${facts.join('\n')}`,
-                    },
-                });
-            }
-            catch (error) {
-                return res.send({
-                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-                    data: {
-                        content: `Error: ${error}`,
-                    },
-                });
-            }
+            getPaginatedItem('fact', 20, options?.find(opt => opt.name === 'pagination')?.value || 1, InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE);
         }
 
         if (name === 'gif-add') {
             try {
                 const data = options?.find(opt => opt.name === 'data')?.value;
-    
+
                 if (!data) {
                     return res.send({
                         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
@@ -452,14 +404,14 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                         },
                     });
                 }
-    
+
                 const query = await fetch(`http://${process.env.DB_HOST}:3333/router/gif/add`, {
                     method: "POST",
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ data })
                 });
                 const response = await query.json();
-    
+
                 if (response.affectedRows > 0) {
                     return res.send({
                         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
@@ -468,7 +420,7 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                         },
                     });
                 }
-    
+
                 return res.send({
                     type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                     data: {
@@ -492,7 +444,7 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                 const quoted = options?.find(opt => opt.name === 'quoted')?.value;
                 const quoted_by = options?.find(opt => opt.name === 'quoted_by')?.value;
                 const game = options?.find(opt => opt.name === 'game')?.value;
-    
+
                 if (!data || !quoted || !quoted_by || !game) {
                     return res.send({
                         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
@@ -501,14 +453,14 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                         },
                     });
                 }
-    
+
                 const query = await fetch(`http://${process.env.DB_HOST}:3333/router/quote/add`, {
                     method: "POST",
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ data, quoted, quoted_by, game })
                 });
                 const response = await query.json();
-    
+
                 if (response.affectedRows > 0) {
                     return res.send({
                         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
@@ -517,7 +469,7 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                         },
                     });
                 }
-    
+
                 return res.send({
                     type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                     data: {
@@ -538,7 +490,7 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
         if (name === 'fact-add') {
             try {
                 const data = options?.find(opt => opt.name === 'data')?.value;
-    
+
                 if (!data) {
                     return res.send({
                         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
@@ -547,14 +499,14 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                         },
                     });
                 }
-    
+
                 const query = await fetch(`http://${process.env.DB_HOST}:3333/router/fact/add`, {
                     method: "POST",
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ data })
                 });
                 const response = await query.json();
-    
+
                 if (response.affectedRows > 0) {
                     return res.send({
                         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
@@ -563,7 +515,7 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                         },
                     });
                 }
-    
+
                 return res.send({
                     type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                     data: {
@@ -585,14 +537,14 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
             try {
                 const id = options?.find(opt => opt.name === 'id')?.value;
                 const data = options?.find(opt => opt.name === 'data')?.value;
-    
+
                 const query = await fetch(`http://${process.env.DB_HOST}:3333/router/gif/update`, {
                     method: "POST",
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ id, data })
                 });
                 const response = await query.json();
-    
+
                 if (response.affectedRows > 0) {
                     return res.send({
                         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
@@ -601,7 +553,7 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                         },
                     });
                 }
-    
+
                 return res.send({
                     type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                     data: {
@@ -627,7 +579,7 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                 const quoted_by = options?.find(opt => opt.name === 'quoted_by')?.value;
                 const game = options?.find(opt => opt.name === 'game')?.value;
                 const date = options?.find(opt => opt.name === 'date')?.value;
-    
+
                 if (!data && !quoted && !quoted_by && !game && !date)
                     return res.send({
                         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
@@ -635,14 +587,14 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                             content: `You need to supply at least one of the optional commands.`,
                         },
                     });
-    
+
                 const query = await fetch(`http://${process.env.DB_HOST}:3333/router/quote/update`, {
                     method: "POST",
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ id, data, quoted, user: quoted_by, game, date })
                 });
                 const response = await query.json();
-    
+
                 if (response.affectedRows > 0) {
                     return res.send({
                         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
@@ -651,7 +603,7 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                         },
                     });
                 }
-    
+
                 return res.send({
                     type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                     data: {
@@ -673,14 +625,14 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
             try {
                 const id = options?.find(opt => opt.name === 'id')?.value;
                 const data = options?.find(opt => opt.name === 'data')?.value;
-    
+
                 const query = await fetch(`http://${process.env.DB_HOST}:3333/router/fact/update`, {
                     method: "POST",
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ id, data })
                 });
                 const response = await query.json();
-    
+
                 if (response.affectedRows > 0) {
                     return res.send({
                         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
@@ -689,7 +641,7 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                         },
                     });
                 }
-    
+
                 return res.send({
                     type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                     data: {
@@ -710,14 +662,14 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
         if (name === 'gif-delete') {
             try {
                 const id = options?.find(opt => opt.name === 'id')?.value;
-    
+
                 const query = await fetch(`http://${process.env.DB_HOST}:3333/router/gif/delete`, {
                     method: "POST",
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ id })
                 });
                 const response = await query.json();
-    
+
                 if (response.affectedRows > 0) {
                     return res.send({
                         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
@@ -726,7 +678,7 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                         },
                     });
                 }
-    
+
                 return res.send({
                     type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                     data: {
@@ -747,14 +699,14 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
         if (name === 'quote-delete') {
             try {
                 const id = options?.find(opt => opt.name === 'id')?.value;
-    
+
                 const query = await fetch(`http://${process.env.DB_HOST}:3333/router/quote/delete`, {
                     method: "POST",
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ id })
                 });
                 const response = await query.json();
-    
+
                 if (response.affectedRows > 0) {
                     return res.send({
                         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
@@ -763,7 +715,7 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                         },
                     });
                 }
-    
+
                 return res.send({
                     type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                     data: {
@@ -784,14 +736,14 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
         if (name === 'fact-delete') {
             try {
                 const id = options?.find(opt => opt.name === 'id')?.value;
-    
+
                 const query = await fetch(`http://${process.env.DB_HOST}:3333/router/fact/delete`, {
                     method: "POST",
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ id })
                 });
                 const response = await query.json();
-    
+
                 if (response.affectedRows > 0) {
                     return res.send({
                         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
@@ -800,7 +752,7 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                         },
                     });
                 }
-    
+
                 return res.send({
                     type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                     data: {

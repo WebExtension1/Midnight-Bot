@@ -151,7 +151,7 @@ const QUOTE_DEBUG = {
       name: "pagination",
       description: "Ranges in 25s.",
       type: 4,
-      required: true
+      required: false
     }
   ]
 }
@@ -164,7 +164,7 @@ const FACT_DEBUG = {
       name: "pagination",
       description: "Ranges in 25s.",
       type: 4,
-      required: true
+      required: false
     }
   ]
 }
@@ -177,7 +177,7 @@ const GIF_DEBUG = {
       name: "pagination",
       description: "Ranges in 25s.",
       type: 4,
-      required: true
+      required: false
     }
   ]
 }
