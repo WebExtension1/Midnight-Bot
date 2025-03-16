@@ -62,7 +62,7 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                     server = true;
                 }
 
-                const response = {};
+                let response = {};
                 if (server) {
                     const details = JSON.parse(fs.readFileSync(usageFile, 'utf8'));
                     response = {
@@ -100,8 +100,8 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                                     /react: ${response["react"] || 0}
                                     /quote: ${response["quote"] || 0}
                                     /gif: ${response["gif"] || 0}
-                                    /linktree: ${response["linktree"] || 0}
                                     /stats: ${response["stats"] || 0}
+                                    /linktree: ${response["linktree"] || 0}
                                 `,
                                 color: 0x0099ff,
                             }
