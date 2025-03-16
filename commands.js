@@ -110,7 +110,7 @@ const FACT_ADD = {
   options: [
     {
       name: "data",
-      description: "The fact. Don't write 'Did you know!' as it is automatically appended.",
+      description: "The fact.",
       type: 3,
       required: true
     }
@@ -137,7 +137,7 @@ const QUOTE_DEBUG = {
     {
       name: "pagination",
       description: "Ranges in 25s.",
-      type: 3,
+      type: 4,
       required: true
     }
   ]
@@ -150,7 +150,7 @@ const FACT_DEBUG = {
     {
       name: "pagination",
       description: "Ranges in 25s.",
-      type: 3,
+      type: 4,
       required: true
     }
   ]
@@ -163,12 +163,132 @@ const GIF_DEBUG = {
     {
       name: "pagination",
       description: "Ranges in 25s.",
+      type: 4,
+      required: true
+    }
+  ]
+}
+
+const QUOTE_UPDATE = {
+  name: 'quote-update',
+  description: 'Update Quotes',
+  options: [
+    {
+      name: "id",
+      description: "Quote's id.",
+      type: 4,
+      required: true
+    },
+    {
+      name: "data",
+      description: "The quote.",
+      type: 3,
+      required: false
+    },
+    {
+      name: "quoted",
+      description: "Who was quoted.",
+      type: 3,
+      required: false
+    },
+    {
+      name: "quoted_by",
+      description: "Who made the quote.",
+      type: 3,
+      required: false
+    },
+    {
+      name: "game",
+      description: "Quote's data.",
+      type: 3,
+      required: false
+    },
+    {
+      name: "date",
+      description: "Quote's data.",
+      type: 3,
+      required: false
+    }
+  ]
+}
+
+const FACT_UPDATE = {
+  name: 'fact-update',
+  description: 'Update Facts',
+  options: [
+    {
+      name: "id",
+      description: "Fact's id.",
+      type: 4,
+      required: true
+    },
+    {
+      name: "data",
+      description: "Fact's data.",
       type: 3,
       required: true
     }
   ]
 }
 
-const ALL_PRIVATE_COMMANDS = [QUOTE_ADD, FACT_ADD, GIF_ADD, QUOTE_DEBUG, FACT_DEBUG, GIF_DEBUG];
+const GIF_UPDATE = {
+  name: 'gif-update',
+  description: 'Update Gifs',
+  options: [
+    {
+      name: "id",
+      description: "Gif's id.",
+      type: 4,
+      required: true
+    },
+    {
+      name: "data",
+      description: "Gif's data.",
+      type: 3,
+      required: true
+    }
+  ]
+}
+
+const QUOTE_DELETE = {
+  name: 'quote-delete',
+  description: 'Delete Quote',
+  options: [
+    {
+      name: "id",
+      description: "Quotes's id.",
+      type: 4,
+      required: true
+    }
+  ]
+}
+
+const FACT_DELETE = {
+  name: 'fact-delete',
+  description: 'Delete Fact',
+  options: [
+    {
+      name: "id",
+      description: "Quotes's id.",
+      type: 4,
+      required: true
+    }
+  ]
+}
+
+const GIF_DELETE = {
+  name: 'gif-delete',
+  description: 'Delete Quote',
+  options: [
+    {
+      name: "id",
+      description: "Quotes's id.",
+      type: 4,
+      required: true
+    }
+  ]
+}
+
+const ALL_PRIVATE_COMMANDS = [QUOTE_ADD, FACT_ADD, GIF_ADD, QUOTE_DEBUG, FACT_DEBUG, GIF_DEBUG, QUOTE_UPDATE, FACT_UPDATE, GIF_UPDATE, QUOTE_DELETE, FACT_DELETE, GIF_DELETE];
 
 InstallGuildCommands(process.env.APP_ID, process.env.PRIVATE_GUILD_ID, ALL_PRIVATE_COMMANDS);

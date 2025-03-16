@@ -32,4 +32,55 @@ router.post("/add", async (req, res, next) => {
     }
 });
 
+router.post("/update", async (req, res, next) => {
+    try {
+        const { id, data, quoted, user, game, date } = req.body;
+        
+        let params = [];
+        if (data)
+            params.push(data);
+        if (quoted)
+            params.push(quoted);
+        if (user)
+            params.push(user);
+        if (game)
+            params.push(game);
+        if (date)
+            params.push(date);
+        params.push(id);
+
+        const [result] = await pool.execute(`
+            UPDATE quote
+            SET
+            ${data && 'data = ?'}
+            ${quoted && 'quoted = ?'}
+            ${user && 'user = ?'}
+            ${game && 'game = ?'}
+            ${date && 'date = ?'}
+            WHERE quote_id = ?
+        `, [params]);
+
+        res.json({ message: "Quote updated", affectedRows: result.affectedRows });
+    }
+    catch (error) {
+        next(error);
+    }
+});
+
+router.post("/delete", async (req, res, next) => {
+    try {
+        const { id } = req.body;
+
+        const [result] = await pool.execute(`
+            DELETE FROM quotes
+            WHERE quotes_id = ?
+        `, [id]);
+
+        res.json({ message: "Quote deleted", affectedRows: result.affectedRows });
+    }
+    catch (error) {
+        next(error);
+    }
+});
+
 export default router;

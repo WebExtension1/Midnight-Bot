@@ -36,36 +36,16 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
             });
         }
 
-        if (name === 'fact') {
-            const data = await fetch(`http://${process.env.DB_HOST}:3333/router/fact/get`, {
+        if (name === 'gif') {
+            const data = await fetch(`http://${process.env.DB_HOST}:3333/router/gif/get`, {
                 method: "GET"
             });
             const response = await data.json();
-            let fact = response[Math.floor(Math.random() * response.length)];
-
-            if (options) {
-                const id = options?.find(opt => opt.name === 'id')?.value
-                if (id) {
-                    fact = response.find(fact => fact.fact_id === id);
-                }
-            }
-
-            if (!fact)
-                return res.status(400).json({ error: 'Error resolving the request' });
 
             return res.send({
                 type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                 data: {
-                    embeds: [
-                        {
-                            title: `Did you know!`,
-                            description: `${fact.data}`,
-                            color: 0x0099ff,
-                            fields: [
-                                { name: "ID", value: `**${fact.fact_id}**`, inline: true }
-                            ],
-                        }
-                    ]
+                    content: `${response[Math.floor(Math.random() * response.length)].data}`,
                 },
             });
         }
@@ -122,16 +102,36 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
             });
         }
 
-        if (name === 'gif') {
-            const data = await fetch(`http://${process.env.DB_HOST}:3333/router/gif/get`, {
+        if (name === 'fact') {
+            const data = await fetch(`http://${process.env.DB_HOST}:3333/router/fact/get`, {
                 method: "GET"
             });
             const response = await data.json();
+            let fact = response[Math.floor(Math.random() * response.length)];
+
+            if (options) {
+                const id = options?.find(opt => opt.name === 'id')?.value
+                if (id) {
+                    fact = response.find(fact => fact.fact_id === id);
+                }
+            }
+
+            if (!fact)
+                return res.status(400).json({ error: 'Error resolving the request' });
 
             return res.send({
                 type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                 data: {
-                    content: `${response[Math.floor(Math.random() * response.length)].data}`,
+                    embeds: [
+                        {
+                            title: `Did you know!`,
+                            description: `${fact.data}`,
+                            color: 0x0099ff,
+                            fields: [
+                                { name: "ID", value: `**${fact.fact_id}**`, inline: true }
+                            ],
+                        }
+                    ]
                 },
             });
         }
@@ -170,7 +170,7 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
 
             const page = options?.find(opt => opt.name === 'pagination')?.value;
 
-            const quotes = response.filter(quote => quote.quote_id > ((page - 1) * 25) && quote.quote_id <= (page * 25)).map(quote => quote.quote_id + ': ' + quote.data + ' - ' + quote.quoted + '. By ' + quote.quoted_by + ' playing ' + quote.game + ' at ' + quote.date );
+            const quotes = response.filter(quote => quote.quote_id > ((page - 1) * 10) && quote.quote_id <= (page * 10)).map(quote => `${quote.quote_id}: ${quote.data} - ${quote.quoted}.\nBy **${quote.user}** playing **${quote.game}** at **${formatDate(quote.date)}**\n`);
 
             if (!quotes)
                 return res.send({
@@ -197,7 +197,7 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
 
             const page = options?.find(opt => opt.name === 'pagination')?.value;
 
-            const facts = response.filter(fact => fact.fact_id > ((page - 1) * 25) && fact.fact_id <= (page * 25)).map(fact => fact.fact_id + ': ' + fact.data );
+            const facts = response.filter(fact => fact.fact_id > ((page - 1) * 20) && fact.fact_id <= (page * 20)).map(fact => fact.fact_id + ': ' + fact.data );
 
             if (!facts)
                 return res.send({
@@ -212,6 +212,42 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                 type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                 data: {
                     content: `${facts.join('\n')}`,
+                },
+            });
+        }
+        
+        if (name === 'gif-add') {
+            const data = options?.find(opt => opt.name === 'data')?.value;
+
+            if (!data) {
+                return res.send({
+                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data: {
+                        content: `All details need to be specified.`,
+                    },
+                });
+            }
+
+            const query = await fetch(`http://${process.env.DB_HOST}:3333/router/gif/add`, {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ data })
+            });
+            const response = await query.json();
+
+            if (response.affectedRows > 0) {
+                return res.send({
+                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data: {
+                        content: `Gif successfully added.`,
+                    },
+                });
+            }
+
+            return res.send({
+                type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                data: {
+                    content: `Database insertion failed.`,
                 },
             });
         }
@@ -243,42 +279,6 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                     type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                     data: {
                         content: `Quote successfully added.`,
-                    },
-                });
-            }
-
-            return res.send({
-                type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-                data: {
-                    content: `Database insertion failed.`,
-                },
-            });
-        }
-
-        if (name === 'gif-add') {
-            const data = options?.find(opt => opt.name === 'data')?.value;
-
-            if (!data) {
-                return res.send({
-                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-                    data: {
-                        content: `All details need to be specified.`,
-                    },
-                });
-            }
-
-            const query = await fetch(`http://${process.env.DB_HOST}:3333/router/gif/add`, {
-                method: "POST",
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ data })
-            });
-            const response = await query.json();
-
-            if (response.affectedRows > 0) {
-                return res.send({
-                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-                    data: {
-                        content: `Gif successfully added.`,
                     },
                 });
             }
@@ -323,6 +323,183 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                 type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                 data: {
                     content: `Database insertion failed.`,
+                },
+            });
+        }
+
+        if (name === 'gif-update') {
+            const id = options?.find(opt => opt.name === 'id')?.value;
+            const data = options?.find(opt => opt.name === 'data')?.value;
+            
+            const query = await fetch(`http://${process.env.DB_HOST}:3333/router/gif/update`, {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, data })
+            });
+            const response = await query.json();
+         
+            if (response.affectedRows > 0) {
+                return res.send({
+                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data: {
+                        content: `Gif successfully updated.`,
+                    },
+                });
+            }
+
+            return res.send({
+                type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                data: {
+                    content: `Database update failed.`,
+                },
+            });
+        }
+
+        if (name === 'quote-update') {
+            const id = options?.find(opt => opt.name === 'id')?.value;
+            const data = options?.find(opt => opt.name === 'data')?.value;
+            const quote = options?.find(opt => opt.name === 'quote')?.value;
+            const quoted_by = options?.find(opt => opt.name === 'quoted_by')?.value;
+            const game = options?.find(opt => opt.name === 'game')?.value;
+            const date = options?.find(opt => opt.name === 'date')?.value;
+            
+            if (!data && !quote && !quoted_by && !game && !date)
+                return res.send({
+                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data: {
+                        content: `You need to supply at least one of the optional commands.`,
+                    },
+                });
+            
+            const query = await fetch(`http://${process.env.DB_HOST}:3333/router/quote/update`, {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, data, quote, user: quoted_by, game, date })
+            });
+            const response = await query.json();
+         
+            if (response.affectedRows > 0) {
+                return res.send({
+                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data: {
+                        content: `Quote successfully updated.`,
+                    },
+                });
+            }
+
+            return res.send({
+                type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                data: {
+                    content: `Database update failed.`,
+                },
+            });
+        }
+
+        if (name === 'fact-update') {
+            const id = options?.find(opt => opt.name === 'id')?.value;
+            const data = options?.find(opt => opt.name === 'data')?.value;
+            
+            const query = await fetch(`http://${process.env.DB_HOST}:3333/router/fact/update`, {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, data })
+            });
+            const response = await query.json();
+         
+            if (response.affectedRows > 0) {
+                return res.send({
+                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data: {
+                        content: `Fact successfully updated.`,
+                    },
+                });
+            }
+
+            return res.send({
+                type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                data: {
+                    content: `Database update failed.`,
+                },
+            });
+        }
+
+        if (name === 'gif-delete') {
+            const id = options?.find(opt => opt.name === 'id')?.value;
+            
+            const query = await fetch(`http://${process.env.DB_HOST}:3333/router/gif/delete`, {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id })
+            });
+            const response = await query.json();
+         
+            if (response.affectedRows > 0) {
+                return res.send({
+                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data: {
+                        content: `Gif successfully deleted.`,
+                    },
+                });
+            }
+
+            return res.send({
+                type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                data: {
+                    content: `Database deletion failed.`,
+                },
+            });
+        }
+
+        if (name === 'quote-delete') {
+            const id = options?.find(opt => opt.name === 'id')?.value;
+            
+            const query = await fetch(`http://${process.env.DB_HOST}:3333/router/quote/delete`, {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id })
+            });
+            const response = await query.json();
+         
+            if (response.affectedRows > 0) {
+                return res.send({
+                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data: {
+                        content: `Quote successfully deleted.`,
+                    },
+                });
+            }
+
+            return res.send({
+                type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                data: {
+                    content: `Database deletion failed.`,
+                },
+            });
+        }
+
+        if (name === 'fact-delete') {
+            const id = options?.find(opt => opt.name === 'id')?.value;
+            
+            const query = await fetch(`http://${process.env.DB_HOST}:3333/router/fact/delete`, {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id })
+            });
+            const response = await query.json();
+         
+            if (response.affectedRows > 0) {
+                return res.send({
+                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data: {
+                        content: `Fact successfully deleted.`,
+                    },
+                });
+            }
+
+            return res.send({
+                type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                data: {
+                    content: `Database deletion failed.`,
                 },
             });
         }
