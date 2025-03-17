@@ -35,6 +35,62 @@ function trackCommandUsage(userId, commandName) {
 router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (req, res) {
     const { type, data, guild_id, member } = req.body;
 
+    const getPaginatedShop = async (page, returnType) => {
+        const data = await fetch(`http://${process.env.DB_HOST}:3333/router/groups/count`, {
+            method: "GET"
+        });
+        const response = await data.json();
+        const pages = response.pages;
+        if (page < 1) {
+            page = pages;
+        } else if (page > pages) {
+            page = 1;
+        }
+        
+        return res.send({
+            type: returnType,
+            data: {
+                embeds: [
+                    {
+                        title: `Shop`,
+                        description: `
+- Common Pack (1)
+- Uncommon Pack (2)
+- Common Pack (3)
+- Uncommon Pack (4)
+- Rare Pack (5)
+- Legendary Pack (6)
+- "One above legendary pack" (7)
+                        `,
+                        color: 0x0099ff,
+                        fields: [
+                            { name: "Page", value: `${page} of ${pages}`, inline: true },
+                        ],
+                    }
+                ],
+                components: [
+                    {
+                        type: 1,
+                        components: [
+                            {
+                                type: 2,
+                                label: "<--",
+                                style: 1,
+                                custom_id: `back_shop_${page}`,
+                            },
+                            {
+                                type: 2,
+                                label: "-->",
+                                style: 1,
+                                custom_id: `next_shop_${page}`,
+                            }
+                        ]
+                    }
+                ]
+            },
+        })
+    }
+
     const getPaginatedItem = async (type, pagination_amount, page, returnType) => {
         try {
             const data = await fetch(`http://${process.env.DB_HOST}:3333/router/${type}/get`, {
@@ -126,34 +182,53 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
         const direction = items[0];
         const type = items[1];
         let page = items[2];
-        let pagination = 25;
 
-        if (direction === 'next1') {
-            page++;
-        } else if (direction === 'back1') {
-            page--;
-        } else if (direction === 'next2') {
-            page = 0;
-        } else {
-            page = 1000000;
+        if (type === "gif" || type === "quote" || type === "fact") {
+            if (direction === 'next1')
+                page++;
+            else if (direction === 'back1')
+                page--;
+            else if (direction === 'next2')
+                page = 0;
+            else
+                page = 1000000;
+    
+            let pagination = 25;
+            if (type === 'quote')
+                pagination = 10;
+            else if (type === 'fact')
+                pagination = 20;
+    
+            try {
+                getPaginatedItem(type, pagination, page, InteractionResponseType.UPDATE_MESSAGE);
+            }
+            catch (error) {
+                return res.send({
+                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data: {
+                        content: `Error: ${error}`,
+                    },
+                });
+            }
         }
+        else if (type === "shop") {
+            if (direction === "next")
+                page++;
+            else
+                page--;
 
-        if (type === 'quote')
-            pagination = 10;
-        else if (type === 'fact')
-            pagination = 20;
-
-        try {
-            getPaginatedItem(type, pagination, page, InteractionResponseType.UPDATE_MESSAGE);
-        }
-        catch (error) {
-            return res.send({
-                type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-                data: {
-                    content: `Error: ${error}`,
-                },
-            });
-        }
+            try {
+                getPaginatedShop(page, InteractionResponseType.UPDATE_MESSAGE);
+            }
+            catch (error) {
+                return res.send({
+                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data: {
+                        content: `Error: ${error}`,
+                    },
+                });
+            }
+        }        
     }
 
     if (type === InteractionType.APPLICATION_COMMAND) {
@@ -828,6 +903,22 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                     },
                 });
             }
+        }
+
+        if (name === "shop") {
+            getPaginatedShop(1, InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE);
+        }
+
+        if (name === 'inventory') {
+
+        }
+
+        if (name === 'buy') {
+            
+        }
+
+        if (name === 'open') {
+            
         }
 
         // console.error(`unknown command: ${name}`);

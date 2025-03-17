@@ -302,6 +302,48 @@ const GIF_DELETE = {
   ]
 }
 
-const ALL_PRIVATE_COMMANDS = [QUOTE_ADD, FACT_ADD, GIF_ADD, QUOTE_DEBUG, FACT_DEBUG, GIF_DEBUG, QUOTE_UPDATE, FACT_UPDATE, GIF_UPDATE, QUOTE_DELETE, FACT_DELETE, GIF_DELETE];
+const SHOP = {
+  name: 'shop',
+  description: "Display the card shop",
+  type: 1,
+  integration_types: [0, 1],
+  contexts: [0, 1, 2],
+}
+
+const INVENTORY = {
+  name: 'inventory',
+  description: "Display your unopened packs",
+  type: 1,
+  integration_types: [0, 1],
+  contexts: [0, 1, 2],
+}
+
+const BUY = {
+  name: 'buy',
+  description: "Buy a pack from the store",
+  options: [
+    {
+      name: "name",
+      description: "Pack name.",
+      type: 3,
+      required: true
+    }
+  ]
+}
+
+const OPEN = {
+  name: 'open',
+  description: "Open a pack from your inventory",
+  options: [
+    {
+      name: "name",
+      description: "Pack name.",
+      type: 3,
+      required: true
+    }
+  ]
+}
+
+const ALL_PRIVATE_COMMANDS = [QUOTE_ADD, FACT_ADD, GIF_ADD, QUOTE_DEBUG, FACT_DEBUG, GIF_DEBUG, QUOTE_UPDATE, FACT_UPDATE, GIF_UPDATE, QUOTE_DELETE, FACT_DELETE, GIF_DELETE, SHOP, INVENTORY, BUY, OPEN];
 
 InstallGuildCommands(process.env.APP_ID, process.env.PRIVATE_GUILD_ID, ALL_PRIVATE_COMMANDS);
