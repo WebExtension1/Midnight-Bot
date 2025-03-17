@@ -82,7 +82,15 @@ const STATS = {
   ]
 }
 
-const ALL_COMMANDS = [REACT, QUOTE, LINKTREE, FACT, GIF, STATS];
+const SHOP = {
+  name: 'shop',
+  description: "Display the card shop",
+  type: 1,
+  integration_types: [0, 1],
+  contexts: [0, 1, 2],
+}
+
+const ALL_COMMANDS = [REACT, QUOTE, LINKTREE, FACT, GIF, STATS, SHOP];
 
 InstallGlobalCommands(process.env.APP_ID, ALL_COMMANDS);
 
@@ -141,6 +149,14 @@ const GIF_ADD = {
       required: true
     }
   ]
+}
+
+const REACT_DEBUG = {
+  name: 'react-debug',
+  description: 'Debug Reacts',
+  type: 1,
+  integration_types: [0, 1],
+  contexts: [0, 1, 2],
 }
 
 const QUOTE_DEBUG = {
@@ -302,14 +318,6 @@ const GIF_DELETE = {
   ]
 }
 
-const SHOP = {
-  name: 'shop',
-  description: "Display the card shop",
-  type: 1,
-  integration_types: [0, 1],
-  contexts: [0, 1, 2],
-}
-
 const INVENTORY = {
   name: 'inventory',
   description: "Display your unopened packs",
@@ -344,6 +352,6 @@ const OPEN = {
   ]
 }
 
-const ALL_PRIVATE_COMMANDS = [QUOTE_ADD, FACT_ADD, GIF_ADD, QUOTE_DEBUG, FACT_DEBUG, GIF_DEBUG, QUOTE_UPDATE, FACT_UPDATE, GIF_UPDATE, QUOTE_DELETE, FACT_DELETE, GIF_DELETE, SHOP, INVENTORY, BUY, OPEN];
+const ALL_PRIVATE_COMMANDS = [QUOTE_ADD, FACT_ADD, REACT_DEBUG, GIF_ADD, QUOTE_DEBUG, FACT_DEBUG, GIF_DEBUG, QUOTE_UPDATE, FACT_UPDATE, GIF_UPDATE, QUOTE_DELETE, FACT_DELETE, GIF_DELETE, INVENTORY, BUY, OPEN];
 
 InstallGuildCommands(process.env.APP_ID, process.env.PRIVATE_GUILD_ID, ALL_PRIVATE_COMMANDS);

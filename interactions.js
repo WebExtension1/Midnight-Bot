@@ -70,7 +70,7 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
             data: {
                 embeds: [
                     {
-                        title: `${response[0][groupName]} Shop`,
+                        title: `${response[0].groupName} Shop`,
                         description: details.join('\n'),
                         color: 0x0099ff,
                         fields: [
@@ -327,7 +327,7 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
 
         if (name === 'react') {
             try {
-                const emojis = client.guilds.cache.get(process.env.PUBLIC_GUILD_ID).emojis.cache.map(emoji => emoji.toString());
+                const emojis = client.guilds.cache.get(process.env.PUBLIC_GUILD_ID).emojis.cache.map(emoji => emoji.toString()).filter(emoji => !emoji.includes('biglad2'));
 
                 return res.send({
                     type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
@@ -482,6 +482,27 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                                 ],
                             }
                         ]
+                    },
+                });
+            }
+            catch (error) {
+                return res.send({
+                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data: {
+                        content: `Error: ${error}`,
+                    },
+                });
+            }
+        }
+
+        if (name === 'react-debug') {
+            try {
+                const emojis = client.guilds.cache.get(process.env.PUBLIC_GUILD_ID).emojis.cache.map(emoji => emoji.toString()).filter(emoji => !emoji.includes('biglad2'));
+
+                return res.send({
+                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data: {
+                        content: emojis.join(' '),
                     },
                 });
             }
