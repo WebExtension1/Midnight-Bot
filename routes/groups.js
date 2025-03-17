@@ -16,15 +16,15 @@ router.get("/count", async (_req, res, next) => {
     }
 });
 
-router.get("/page", async (_req, res, next) => {
+router.post("/get", async (req, res, next) => {
     const { page } = req.body;
 
     try {
         const [result] = await pool.execute(`
-            SELECT packs.name, packs.description, groups.name FROM packs
+            SELECT packs.name AS packName, packs.description AS description, groups.name AS groupName FROM packs
             INNER JOIN groups ON packs.group_id = groups.group_id
             WHERE groups.group_id = ?;
-        `);
+        `, [page]);
         res.json(result);
     }
     catch (error) {

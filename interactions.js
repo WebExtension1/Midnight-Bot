@@ -48,29 +48,30 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
         }
 
         data = await fetch(`http://${process.env.DB_HOST}:3333/router/groups/get`, {
-            method: "GET",
+            method: "POST",
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ page })
         });
         response = await data.json();
 
-        console.log(response);
+        if (response.length < 1) {
+            return res.send({
+                type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                data: {
+                    content: `No packs found for the given page.`,
+                },
+            });
+        }
+
+        const details = response.map(pack => `### ${pack.packName}\n${pack.description}`);
         
         return res.send({
             type: returnType,
             data: {
                 embeds: [
                     {
-                        title: `Shop`,
-                        description: `
-- Common Pack (1)
-- Uncommon Pack (2)
-- Common Pack (3)
-- Uncommon Pack (4)
-- Rare Pack (5)
-- Legendary Pack (6)
-- "One above legendary pack" (7)
-                        `,
+                        title: `${response[0][groupName]} Shop`,
+                        description: details.join('\n'),
                         color: 0x0099ff,
                         fields: [
                             { name: "Page", value: `${page} of ${pages}`, inline: true },
