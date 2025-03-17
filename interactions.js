@@ -36,16 +36,25 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
     const { type, data, guild_id, member } = req.body;
 
     const getPaginatedShop = async (page, returnType) => {
-        const data = await fetch(`http://${process.env.DB_HOST}:3333/router/groups/count`, {
+        let data = await fetch(`http://${process.env.DB_HOST}:3333/router/groups/count`, {
             method: "GET"
         });
-        const response = await data.json();
-        const pages = response.pages;
+        let response = await data.json();
+        const pages = response[0].pages;
         if (page < 1) {
             page = pages;
         } else if (page > pages) {
             page = 1;
         }
+
+        data = await fetch(`http://${process.env.DB_HOST}:3333/router/groups/get`, {
+            method: "GET",
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ page })
+        });
+        response = await data.json();
+
+        console.log(response);
         
         return res.send({
             type: returnType,
