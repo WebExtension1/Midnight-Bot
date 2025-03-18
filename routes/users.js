@@ -43,24 +43,29 @@ router.post("/daily", async (req, res, next) => {
             WHERE user_id = ?
         `, [user_id]);
 
+        let balance = 0;
         if (result.length === 0) {
             setupUser(user_id);
+            balance = 25;
+        } else {
+            balance = result[0].balance;
         }
 
         [result] = await pool.execute(
-            "UPDATE users SET balance = balance + ?, daily = CURRENT_DATE WHERE user_id = ? AND daily != CURRENT_DATE",
-            [amount, user_id]
+            "UPDATE users SET balance = balance + 10, daily = CURRENT_DATE WHERE user_id = ? AND daily != CURRENT_DATE",
+            [user_id]
         );
+        if (result.affectedRows > 0)
+            balance += 10;
 
         if (result.affectedRows === 1){
-            return res.json({ balance: result[0].balance + 10, valid: 1 });
+            return res.json({ balance: balance, valid: 1 });
         }
-        return res.json({ balance: result[0].balance + 10, valid: 0 });
+        return res.json({ balance: balance, valid: 0 });
     }
     catch (error) {
         next(error);
     }
 });
-
 
 export default router;
