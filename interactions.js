@@ -833,7 +833,7 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                 return res.send({
                     type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                     data: {
-                        content: `Balance: ${Math.round(query.balance * 100) / 100}`,
+                        content: `Balance: ${Math.round(response.balance * 100) / 100}`,
                     },
                 });
             }
@@ -851,7 +851,19 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
             try {
                 const user_id = member.user.id;
 
-
+                const query = await fetch(`http://${process.env.DB_HOST}:3333/router/users/daily`, {
+                    method: "POST",
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id })
+                });
+                const response = await query.json();
+                
+                return res.send({
+                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data: {
+                        content: `${response.valid === 1 ? 'Daily redeemed!' : 'You have already claimed your daily today.'} Your balance is ${response.balance}.`,
+                    },
+                });
             }
             catch (error) {
                 return res.send({
