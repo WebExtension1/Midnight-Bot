@@ -335,6 +335,32 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
             }
         }
 
+        if (name === "clip") {
+            try {
+                const query = await fetch(`http://${process.env.DB_HOST}:3333/router/clip/get`, {
+                    method: "GET",
+                    headers: { 'Content-Type': 'application/json' },
+                });
+                const response = await query.json();
+
+                return res.send({
+                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data: {
+                        content: `${response[Math.floor(Math.random() * response.length)].data}`,
+                    },
+                });
+
+            }
+            catch (error) {
+                return res.send({
+                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data: {
+                        content: `Error: ${error}`,
+                    },
+                });
+            }
+        }
+
         if (name === 'react-debug') {
             try {
                 const emojis = client.guilds.cache.get(process.env.PUBLIC_GUILD_ID).emojis.cache.map(emoji => emoji.toString()).filter(emoji => !emoji.includes('biglad2'));
@@ -345,6 +371,20 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                         content: emojis.join(' '),
                     },
                 });
+            }
+            catch (error) {
+                return res.send({
+                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data: {
+                        content: `Error: ${error}`,
+                    },
+                });
+            }
+        }
+
+        if (name === 'clip-debug') {
+            try {
+                await getPaginatedItem(res, 'clip', 25, options?.find(opt => opt.name === 'pagination')?.value || 1, InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE);
             }
             catch (error) {
                 return res.send({
@@ -539,6 +579,52 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
             }
         }
 
+        if (name === 'clip-add') {
+            try {
+                const data = options?.find(opt => opt.name === 'data')?.value;
+
+                if (!data) {
+                    return res.send({
+                        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                        data: {
+                            content: `All details need to be specified.`,
+                        },
+                    });
+                }
+
+                const query = await fetch(`http://${process.env.DB_HOST}:3333/router/clip/add`, {
+                    method: "POST",
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ data })
+                });
+                const response = await query.json();
+
+                if (response.affectedRows > 0) {
+                    return res.send({
+                        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                        data: {
+                            content: `Clip successfully added.`,
+                        },
+                    });
+                }
+
+                return res.send({
+                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data: {
+                        content: `Database insertion failed.`,
+                    },
+                });
+            }
+            catch (error) {
+                return res.send({
+                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data: {
+                        content: `Error: ${error}`,
+                    },
+                });
+            }
+        }
+
         if (name === 'gif-update') {
             try {
                 const id = options?.find(opt => opt.name === 'id')?.value;
@@ -644,6 +730,44 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                         data: {
                             content: `Fact successfully updated.`,
+                        },
+                    });
+                }
+
+                return res.send({
+                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data: {
+                        content: `Database update failed.`,
+                    },
+                });
+            }
+            catch (error) {
+                return res.send({
+                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data: {
+                        content: `Error: ${error}`,
+                    },
+                });
+            }
+        }
+
+        if (name === 'clip-update') {
+            try {
+                const id = options?.find(opt => opt.name === 'id')?.value;
+                const data = options?.find(opt => opt.name === 'data')?.value;
+
+                const query = await fetch(`http://${process.env.DB_HOST}:3333/router/clip/update`, {
+                    method: "POST",
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id, data })
+                });
+                const response = await query.json();
+
+                if (response.affectedRows > 0) {
+                    return res.send({
+                        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                        data: {
+                            content: `Clip successfully updated.`,
                         },
                     });
                 }
@@ -776,21 +900,32 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
             }
         }
 
-        if (name === "clip") {
+        if (name === 'clip-delete') {
             try {
-                const query = await fetch(`http://${process.env.DB_HOST}:3333/router/clip/get`, {
-                    method: "GET",
+                const id = options?.find(opt => opt.name === 'id')?.value;
+
+                const query = await fetch(`http://${process.env.DB_HOST}:3333/router/clip/delete`, {
+                    method: "POST",
                     headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id })
                 });
                 const response = await query.json();
+
+                if (response.affectedRows > 0) {
+                    return res.send({
+                        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                        data: {
+                            content: `Clip successfully deleted.`,
+                        },
+                    });
+                }
 
                 return res.send({
                     type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                     data: {
-                        content: `${response[Math.floor(Math.random() * response.length)].data}`,
+                        content: `Database deletion failed.`,
                     },
                 });
-
             }
             catch (error) {
                 return res.send({

@@ -23,6 +23,9 @@ export default async function getPaginatedItem(res, type, pagination_amount, pag
             case 'fact':
                 items = response.filter(fact => fact.fact_id > ((page - 1) * pagination_amount) && fact.fact_id <= (page * pagination_amount)).map(fact => fact.fact_id + ': ' + fact.data);
                 break;
+                case 'fact':
+                    items = response.filter(fact => fact.clip_id > ((page - 1) * pagination_amount) && fact.clip_id <= (page * pagination_amount)).map(fact => fact.clip_id + ': ' + fact.data);
+                    break;
         }
 
         if (items.length === 0) {

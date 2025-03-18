@@ -98,7 +98,23 @@ const CLIP = {
   contexts: [0, 1, 2],
 }
 
-const ALL_COMMANDS = [REACT, QUOTE, LINKTREE, FACT, GIF, STATS, SHOP, CLIP];
+const DAILY = {
+  name: 'daily',
+  description: "Claim your daily balance.",
+  type: 1,
+  integration_types: [0, 1],
+  contexts: [0, 1, 2],
+}
+
+const BALANCE = {
+  name: 'balance',
+  description: "Check your Cat Treat balance.",
+  type: 1,
+  integration_types: [0, 1],
+  contexts: [0, 1, 2],
+}
+
+const ALL_COMMANDS = [REACT, QUOTE, LINKTREE, FACT, GIF, STATS, SHOP, CLIP, DAILY, BALANCE];
 
 InstallGlobalCommands(process.env.APP_ID, ALL_COMMANDS);
 
@@ -159,6 +175,19 @@ const GIF_ADD = {
   ]
 }
 
+const CLIP_ADD = {
+  name: 'clip-add',
+  description: 'Add a new clip.',
+  options: [
+    {
+      name: "data",
+      description: "The clip link.",
+      type: 3,
+      required: true
+    }
+  ]
+}
+
 const REACT_DEBUG = {
   name: 'react-debug',
   description: 'Debug Reacts.',
@@ -173,7 +202,7 @@ const QUOTE_DEBUG = {
   options: [
     {
       name: "pagination",
-      description: "Ranges in 25s.",
+      description: "Page.",
       type: 4,
       required: false
     }
@@ -186,7 +215,7 @@ const FACT_DEBUG = {
   options: [
     {
       name: "pagination",
-      description: "Ranges in 25s.",
+      description: "Page.",
       type: 4,
       required: false
     }
@@ -199,7 +228,20 @@ const GIF_DEBUG = {
   options: [
     {
       name: "pagination",
-      description: "Ranges in 25s.",
+      description: "Page.",
+      type: 4,
+      required: false
+    }
+  ]
+}
+
+const CLIP_DEBUG = {
+  name: 'clip-debug',
+  description: 'Debug clips.',
+  options: [
+    {
+      name: "pagination",
+      description: "Page.",
       type: 4,
       required: false
     }
@@ -287,6 +329,25 @@ const GIF_UPDATE = {
   ]
 }
 
+const CLIP_UPDATE = {
+  name: 'clip-update',
+  description: 'Update Clips.',
+  options: [
+    {
+      name: "id",
+      description: "Clip's id.",
+      type: 4,
+      required: true
+    },
+    {
+      name: "data",
+      description: "Clip's data.",
+      type: 3,
+      required: true
+    }
+  ]
+}
+
 const QUOTE_DELETE = {
   name: 'quote-delete',
   description: 'Delete Quote.',
@@ -306,7 +367,7 @@ const FACT_DELETE = {
   options: [
     {
       name: "id",
-      description: "Quotes's id.",
+      description: "Fact's id.",
       type: 4,
       required: true
     }
@@ -319,7 +380,20 @@ const GIF_DELETE = {
   options: [
     {
       name: "id",
-      description: "Quotes's id.",
+      description: "Gif's id.",
+      type: 4,
+      required: true
+    }
+  ]
+}
+
+const CLIP_DELETE = {
+  name: 'clip-delete',
+  description: 'Delete Clip.',
+  options: [
+    {
+      name: "id",
+      description: "Clip's id.",
       type: 4,
       required: true
     }
@@ -360,22 +434,6 @@ const OPEN = {
   ]
 }
 
-const DAILY = {
-  name: 'daily',
-  description: "Claim your daily balance.",
-  type: 1,
-  integration_types: [0, 1],
-  contexts: [0, 1, 2],
-}
-
-const BALANCE = {
-  name: 'balance',
-  description: "Check your Cat Treat balance.",
-  type: 1,
-  integration_types: [0, 1],
-  contexts: [0, 1, 2],
-}
-
-const ALL_PRIVATE_COMMANDS = [QUOTE_ADD, FACT_ADD, REACT_DEBUG, GIF_ADD, QUOTE_DEBUG, FACT_DEBUG, GIF_DEBUG, QUOTE_UPDATE, FACT_UPDATE, GIF_UPDATE, QUOTE_DELETE, FACT_DELETE, GIF_DELETE, INVENTORY, BUY, OPEN, DAILY, BALANCE];
+const ALL_PRIVATE_COMMANDS = [QUOTE_ADD, FACT_ADD, GIF_ADD, CLIP_ADD, REACT_DEBUG, QUOTE_DEBUG, FACT_DEBUG, GIF_DEBUG, CLIP_DEBUG, QUOTE_UPDATE, FACT_UPDATE, GIF_UPDATE, CLIP_UPDATE, QUOTE_DELETE, FACT_DELETE, GIF_DELETE, CLIP_DELETE, INVENTORY, BUY, OPEN];
 
 InstallGuildCommands(process.env.APP_ID, process.env.PRIVATE_GUILD_ID, ALL_PRIVATE_COMMANDS);
