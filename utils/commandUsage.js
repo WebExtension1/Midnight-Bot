@@ -1,6 +1,6 @@
-const usageFile = process.env.USAGE_FILE;
+const usageFile = `../${process.env.USAGE_FILE}`;
 
-export default function trackCommandUsage(userId, commandName, commandStats) {
+export function trackCommandUsage(userId, commandName, commandStats) {
     if (!commandStats[userId]) {
         commandStats[userId] = {};
     }
@@ -13,6 +13,6 @@ export default function trackCommandUsage(userId, commandName, commandStats) {
     fs.writeFileSync(usageFile, JSON.stringify(commandStats), 'utf8');
 }
 
-export default function getCommandUsageDetails() {
+export function getCommandUsageDetails() {
     return JSON.parse(fs.readFileSync(usageFile, 'utf8'));
 }

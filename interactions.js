@@ -8,14 +8,13 @@ import { client } from './app.js';
 
 // Utils
 import { formatDate } from './utils.js';
-import getPaginatedShop from './utils/paginatedShop';
-import getPaginatedItem from './utils/paginatedItem';
-import trackCommandUsage from "./utils/commandUsage.js";
-import getCommandUsageDetails from './utils/commandUsage.js';
+import getPaginatedShop from './utils/paginatedShop.js';
+import getPaginatedItem from './utils/paginatedItem.js';
+import { trackCommandUsage, getCommandUsageDetails } from "./utils/commandUsage.js";
 
 const router = express.Router();
 
-const usageFile = `process.env.USAGE_FILE`;
+const usageFile = process.env.USAGE_FILE;
 
 let commandStats = {};
 if (fs.existsSync(usageFile)) {
