@@ -51,7 +51,7 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                 pagination = 20;
     
             try {
-                getPaginatedItem(type, pagination, page, InteractionResponseType.UPDATE_MESSAGE);
+                getPaginatedItem(res, type, pagination, page, InteractionResponseType.UPDATE_MESSAGE);
             }
             catch (error) {
                 return res.send({
@@ -69,7 +69,7 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                 page--;
 
             try {
-                getPaginatedShop(page, InteractionResponseType.UPDATE_MESSAGE);
+                getPaginatedShop(res, page, InteractionResponseType.UPDATE_MESSAGE);
             }
             catch (error) {
                 return res.send({
@@ -358,7 +358,7 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
 
         if (name === 'gif-debug') {
             try {
-                await getPaginatedItem('gif', 25, options?.find(opt => opt.name === 'pagination')?.value || 1, InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE);
+                await getPaginatedItem(res, 'gif', 25, options?.find(opt => opt.name === 'pagination')?.value || 1, InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE);
             }
             catch (error) {
                 return res.send({
@@ -372,7 +372,7 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
 
         if (name === 'quote-debug') {
             try {
-                await getPaginatedItem('quote', 10, options?.find(opt => opt.name === 'pagination')?.value || 1, InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE);
+                await getPaginatedItem(res, 'quote', 10, options?.find(opt => opt.name === 'pagination')?.value || 1, InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE);
             }
             catch (error) {
                 return res.send({
@@ -386,7 +386,7 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
 
         if (name === 'fact-debug') {
             try {
-                await getPaginatedItem('fact', 20, options?.find(opt => opt.name === 'pagination')?.value || 1, InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE);
+                await getPaginatedItem(res, 'fact', 20, options?.find(opt => opt.name === 'pagination')?.value || 1, InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE);
             }
             catch (error) {
                 return res.send({
@@ -777,7 +777,7 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
         }
 
         if (name === "shop") {
-            getPaginatedShop(1, InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE);
+            getPaginatedShop(res, 1, InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE);
         }
 
         if (name === 'inventory') {

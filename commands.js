@@ -362,7 +362,7 @@ const DAILY = {
 
 const BALANCE = {
   name: 'balance',
-  description: "Check your Car Treat balance.",
+  description: "Check your Cat Treat balance.",
   type: 1,
   integration_types: [0, 1],
   contexts: [0, 1, 2],

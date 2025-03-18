@@ -1,3 +1,5 @@
+import fs from "fs";
+
 const usageFile = `../${process.env.USAGE_FILE}`;
 
 export function trackCommandUsage(userId, commandName, commandStats) {

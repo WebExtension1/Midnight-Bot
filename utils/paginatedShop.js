@@ -1,4 +1,4 @@
-export default async function getPaginatedShop(page, returnType) {
+export default async function getPaginatedShop(res, page, returnType) {
     let data = await fetch(`http://${process.env.DB_HOST}:3333/router/groups/count`, {
         method: "GET"
     });

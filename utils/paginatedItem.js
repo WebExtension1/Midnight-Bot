@@ -1,4 +1,4 @@
-export default async function getPaginatedItem(type, pagination_amount, page, returnType) {
+export default async function getPaginatedItem(res, type, pagination_amount, page, returnType) {
     try {
         const data = await fetch(`http://${process.env.DB_HOST}:3333/router/${type}/get`, {
             method: "GET"
