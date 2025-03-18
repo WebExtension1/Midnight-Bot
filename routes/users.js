@@ -3,7 +3,7 @@ import pool from '../db.js';
 
 const router = express.Router();
 
-router.get("/balance", async (_req, res, next) => {
+router.post("/balance", async (req, res, next) => {
     try {
         const { user_id } = req.body;
 
@@ -14,7 +14,7 @@ router.get("/balance", async (_req, res, next) => {
         `, [user_id]);
 
         if (result.length > 0) {
-            return res.json({ balance: rows[0].balance });
+            return res.json({ balance: result[0].balance });
         }
 
         await pool.execute(`

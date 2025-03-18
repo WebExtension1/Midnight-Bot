@@ -828,11 +828,12 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ user_id })
                 });
+                const response = await query.json();
                 
                 return res.send({
                     type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                     data: {
-                        content: `Balance: ${query[0].balance}`,
+                        content: `Balance: ${Math.round(query.balance * 100) / 100}`,
                     },
                 });
             }
