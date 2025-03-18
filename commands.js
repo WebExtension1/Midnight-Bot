@@ -90,7 +90,15 @@ const SHOP = {
   contexts: [0, 1, 2],
 }
 
-const ALL_COMMANDS = [REACT, QUOTE, LINKTREE, FACT, GIF, STATS, SHOP];
+const CLIP = {
+  name: 'clip',
+  description: "Get a random clip from Melton's twitch.",
+  type: 1,
+  integration_types: [0, 1],
+  contexts: [0, 1, 2],
+}
+
+const ALL_COMMANDS = [REACT, QUOTE, LINKTREE, FACT, GIF, STATS, SHOP, CLIP];
 
 InstallGlobalCommands(process.env.APP_ID, ALL_COMMANDS);
 

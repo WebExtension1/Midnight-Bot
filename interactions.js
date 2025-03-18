@@ -776,6 +776,32 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
             }
         }
 
+        if (name === "clip") {
+            try {
+                const query = await fetch(`http://${process.env.DB_HOST}:3333/router/clip/get`, {
+                    method: "GET",
+                    headers: { 'Content-Type': 'application/json' },
+                });
+                const response = await query.json();
+
+                return res.send({
+                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data: {
+                        content: `${response[Math.floor(Math.random() * response.length)].data}`,
+                    },
+                });
+
+            }
+            catch (error) {
+                return res.send({
+                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data: {
+                        content: `Error: ${error}`,
+                    },
+                });
+            }
+        }
+
         if (name === "shop") {
             getPaginatedShop(res, 1, InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE);
         }
