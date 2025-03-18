@@ -63,7 +63,7 @@ const FACT = {
 
 const GIF = {
   name: 'gif',
-  description: 'Get a random Melton GIF',
+  description: 'Get a random Melton GIF.',
   type: 1,
   integration_types: [0, 1],
   contexts: [0, 1, 2],
@@ -71,11 +71,11 @@ const GIF = {
 
 const STATS = {
   name: 'stats',
-  description: 'Get your usage stats',
+  description: 'Get your usage stats.',
   options: [
     {
       name: "server",
-      description: "(Optional). True for server stats. False/empty for yours",
+      description: "(Optional). True for server stats. False/empty for yours.",
       type: 5,
       required: false
     }
@@ -84,7 +84,7 @@ const STATS = {
 
 const SHOP = {
   name: 'shop',
-  description: "Display the card shop",
+  description: "Display the card shop.",
   type: 1,
   integration_types: [0, 1],
   contexts: [0, 1, 2],
@@ -153,7 +153,7 @@ const GIF_ADD = {
 
 const REACT_DEBUG = {
   name: 'react-debug',
-  description: 'Debug Reacts',
+  description: 'Debug Reacts.',
   type: 1,
   integration_types: [0, 1],
   contexts: [0, 1, 2],
@@ -161,7 +161,7 @@ const REACT_DEBUG = {
 
 const QUOTE_DEBUG = {
   name: 'quote-debug',
-  description: 'Debug Quotes',
+  description: 'Debug Quotes.',
   options: [
     {
       name: "pagination",
@@ -174,7 +174,7 @@ const QUOTE_DEBUG = {
 
 const FACT_DEBUG = {
   name: 'fact-debug',
-  description: 'Debug Facts',
+  description: 'Debug Facts.',
   options: [
     {
       name: "pagination",
@@ -187,7 +187,7 @@ const FACT_DEBUG = {
 
 const GIF_DEBUG = {
   name: 'gif-debug',
-  description: 'Debug Gifs',
+  description: 'Debug Gifs.',
   options: [
     {
       name: "pagination",
@@ -200,7 +200,7 @@ const GIF_DEBUG = {
 
 const QUOTE_UPDATE = {
   name: 'quote-update',
-  description: 'Update Quotes',
+  description: 'Update Quotes.',
   options: [
     {
       name: "id",
@@ -243,7 +243,7 @@ const QUOTE_UPDATE = {
 
 const FACT_UPDATE = {
   name: 'fact-update',
-  description: 'Update Facts',
+  description: 'Update Facts.',
   options: [
     {
       name: "id",
@@ -262,7 +262,7 @@ const FACT_UPDATE = {
 
 const GIF_UPDATE = {
   name: 'gif-update',
-  description: 'Update Gifs',
+  description: 'Update Gifs.',
   options: [
     {
       name: "id",
@@ -281,7 +281,7 @@ const GIF_UPDATE = {
 
 const QUOTE_DELETE = {
   name: 'quote-delete',
-  description: 'Delete Quote',
+  description: 'Delete Quote.',
   options: [
     {
       name: "id",
@@ -294,7 +294,7 @@ const QUOTE_DELETE = {
 
 const FACT_DELETE = {
   name: 'fact-delete',
-  description: 'Delete Fact',
+  description: 'Delete Fact.',
   options: [
     {
       name: "id",
@@ -307,7 +307,7 @@ const FACT_DELETE = {
 
 const GIF_DELETE = {
   name: 'gif-delete',
-  description: 'Delete Quote',
+  description: 'Delete Quote.',
   options: [
     {
       name: "id",
@@ -320,7 +320,7 @@ const GIF_DELETE = {
 
 const INVENTORY = {
   name: 'inventory',
-  description: "Display your unopened packs",
+  description: "Display your unopened packs.",
   type: 1,
   integration_types: [0, 1],
   contexts: [0, 1, 2],
@@ -328,7 +328,7 @@ const INVENTORY = {
 
 const BUY = {
   name: 'buy',
-  description: "Buy a pack from the store",
+  description: "Buy a pack from the store.",
   options: [
     {
       name: "name",
@@ -341,7 +341,7 @@ const BUY = {
 
 const OPEN = {
   name: 'open',
-  description: "Open a pack from your inventory",
+  description: "Open a pack from your inventory.",
   options: [
     {
       name: "name",
@@ -352,6 +352,22 @@ const OPEN = {
   ]
 }
 
-const ALL_PRIVATE_COMMANDS = [QUOTE_ADD, FACT_ADD, REACT_DEBUG, GIF_ADD, QUOTE_DEBUG, FACT_DEBUG, GIF_DEBUG, QUOTE_UPDATE, FACT_UPDATE, GIF_UPDATE, QUOTE_DELETE, FACT_DELETE, GIF_DELETE, INVENTORY, BUY, OPEN];
+const DAILY = {
+  name: 'daily',
+  description: "Claim your daily balance.",
+  type: 1,
+  integration_types: [0, 1],
+  contexts: [0, 1, 2],
+}
+
+const BALANCE = {
+  name: 'balance',
+  description: "Check your Car Treat balance.",
+  type: 1,
+  integration_types: [0, 1],
+  contexts: [0, 1, 2],
+}
+
+const ALL_PRIVATE_COMMANDS = [QUOTE_ADD, FACT_ADD, REACT_DEBUG, GIF_ADD, QUOTE_DEBUG, FACT_DEBUG, GIF_DEBUG, QUOTE_UPDATE, FACT_UPDATE, GIF_UPDATE, QUOTE_DELETE, FACT_DELETE, GIF_DELETE, INVENTORY, BUY, OPEN, DAILY, BALANCE];
 
 InstallGuildCommands(process.env.APP_ID, process.env.PRIVATE_GUILD_ID, ALL_PRIVATE_COMMANDS);

@@ -1,16 +1,21 @@
+// Server
 import express from "express";
 import fs from "fs";
-import {
-    InteractionResponseType,
-    InteractionType,
-    verifyKeyMiddleware,
-} from 'discord-interactions';
+
+// Discord
+import { InteractionResponseType, InteractionType, verifyKeyMiddleware } from 'discord-interactions';
 import { client } from './app.js';
+
+// Utils
 import { formatDate } from './utils.js';
+import getPaginatedShop from './utils/paginatedShop';
+import getPaginatedItem from './utils/paginatedItem';
+import trackCommandUsage from "./utils/commandUsage.js";
+import getCommandUsageDetails from './utils/commandUsage.js';
 
 const router = express.Router();
 
-const usageFile = process.env.USAGE_FILE;
+const usageFile = `process.env.USAGE_FILE`;
 
 let commandStats = {};
 if (fs.existsSync(usageFile)) {
@@ -19,171 +24,8 @@ if (fs.existsSync(usageFile)) {
     fs.writeFileSync(usageFile, JSON.stringify(commandStats), 'utf8');
 }
 
-function trackCommandUsage(userId, commandName) {
-    if (!commandStats[userId]) {
-        commandStats[userId] = {};
-    }
-
-    if (!commandStats[userId][commandName]) {
-        commandStats[userId][commandName] = 0;
-    }
-    commandStats[userId][commandName]++;
-
-    fs.writeFileSync(usageFile, JSON.stringify(commandStats), 'utf8');
-}
-
 router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (req, res) {
     const { type, data, guild_id, member } = req.body;
-
-    const getPaginatedShop = async (page, returnType) => {
-        let data = await fetch(`http://${process.env.DB_HOST}:3333/router/groups/count`, {
-            method: "GET"
-        });
-        let response = await data.json();
-        const pages = response[0].pages;
-        if (page < 1) {
-            page = pages;
-        } else if (page > pages) {
-            page = 1;
-        }
-
-        data = await fetch(`http://${process.env.DB_HOST}:3333/router/groups/get`, {
-            method: "POST",
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ page })
-        });
-        response = await data.json();
-
-        if (response.length < 1) {
-            return res.send({
-                type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-                data: {
-                    content: `No packs found for the given page.`,
-                },
-            });
-        }
-
-        const details = response.map(pack => `### ${pack.packName}\n${pack.description}`);
-        
-        return res.send({
-            type: returnType,
-            data: {
-                embeds: [
-                    {
-                        title: `${response[0].groupName} Shop`,
-                        description: details.join('\n'),
-                        color: 0x0099ff,
-                        fields: [
-                            { name: "Page", value: `${page} of ${pages}`, inline: true },
-                        ],
-                    }
-                ],
-                components: [
-                    {
-                        type: 1,
-                        components: [
-                            {
-                                type: 2,
-                                label: "<--",
-                                style: 1,
-                                custom_id: `back_shop_${page}`,
-                            },
-                            {
-                                type: 2,
-                                label: "-->",
-                                style: 1,
-                                custom_id: `next_shop_${page}`,
-                            }
-                        ]
-                    }
-                ]
-            },
-        })
-    }
-
-    const getPaginatedItem = async (type, pagination_amount, page, returnType) => {
-        try {
-            const data = await fetch(`http://${process.env.DB_HOST}:3333/router/${type}/get`, {
-                method: "GET"
-            });
-            const response = await data.json();
-            let items = null;
-            
-            const pages = Math.ceil(response.length / pagination_amount);
-            if (page < 1) {
-                page = pages;
-            } else if (page > pages) {
-                page = 1;
-            }
-
-            switch (type) {
-                case 'gif':
-                    items = response.filter(gif => gif.gif_id > ((page - 1) * pagination_amount) && gif.gif_id <= (page * pagination_amount)).map(gif => gif.gif_id + ': ' + gif.data);
-                    break;
-                case 'quote':
-                    items = response.filter(quote => quote.quote_id > ((page - 1) * pagination_amount) && quote.quote_id <= (page * pagination_amount)).map(quote => `${quote.quote_id}: ${quote.data} - ${quote.quoted}.\nBy **${quote.user}** playing **${quote.game}** at **${formatDate(quote.date)}**\n`);
-                    break;
-                case 'fact':
-                    items = response.filter(fact => fact.fact_id > ((page - 1) * pagination_amount) && fact.fact_id <= (page * pagination_amount)).map(fact => fact.fact_id + ': ' + fact.data);
-                    break;
-            }
-
-            if (items.length === 0) {
-                return res.send({
-                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-                    data: {
-                        content: `No ${type}s found for the given page.`,
-                    },
-                });
-            }
-
-            return res.send({
-                type: returnType,
-                data: {
-                    content: `${items.join('\n')}\n\n Page ${page} of ${pages}`,
-                    components: [
-                        {
-                            type: 1,
-                            components: [
-                                {
-                                    type: 2,
-                                    label: "<<-",
-                                    style: 1,
-                                    custom_id: `back2_${type}_${page}`,
-                                },
-                                {
-                                    type: 2,
-                                    label: "<--",
-                                    style: 1,
-                                    custom_id: `back1_${type}_${page}`,
-                                },
-                                {
-                                    type: 2,
-                                    label: "-->",
-                                    style: 1,
-                                    custom_id: `next1_${type}_${page}`,
-                                },
-                                {
-                                    type: 2,
-                                    label: "->>",
-                                    style: 1,
-                                    custom_id: `next2_${type}_${page}`,
-                                }
-                            ]
-                        }
-                    ]
-                },
-            })
-        }
-        catch (error) {
-            return res.send({
-                type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-                data: {
-                    content: `Error: ${error}`,
-                },
-            });
-        }
-    }
 
     if (type === InteractionType.MESSAGE_COMPONENT) {
         const custom_id = data.custom_id;
@@ -245,7 +87,7 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
         const { name, options } = data;
 
         if (guild_id === process.env.PUBLIC_GUILD_ID)
-            trackCommandUsage(member.user.id, name);
+            trackCommandUsage(member.user.id, name, commandStats);
 
         if (name === 'example') {
             try {
@@ -269,8 +111,8 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                 }
 
                 let response = {};
+                const details = getCommandUsageDetails();
                 if (server) {
-                    const details = JSON.parse(fs.readFileSync(usageFile, 'utf8'));
                     response = {
                         fact: 0,
                         react: 0,
@@ -291,7 +133,6 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                     }
                 } else {
                     const sender_id = member.user.id;
-                    const details = JSON.parse(fs.readFileSync(usageFile, 'utf8'));
                     response = details[sender_id];
                 }
 
@@ -941,15 +782,85 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
         }
 
         if (name === 'inventory') {
-
+            try {
+            }
+            catch (error) {
+                return res.send({
+                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data: {
+                        content: `Error: ${error}`,
+                    },
+                });
+            }
         }
 
         if (name === 'buy') {
-            
+            try {
+            }
+            catch (error) {
+                return res.send({
+                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data: {
+                        content: `Error: ${error}`,
+                    },
+                });
+            }
         }
 
         if (name === 'open') {
-            
+            try {
+            }
+            catch (error) {
+                return res.send({
+                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data: {
+                        content: `Error: ${error}`,
+                    },
+                });
+            }
+        }
+
+        if (name === "balance") {
+            try {
+                const user_id = member.user.id;
+
+                const query = await fetch(`http://${process.env.DB_HOST}:3333/router/users/balance`, {
+                    method: "POST",
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id })
+                });
+                
+                return res.send({
+                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data: {
+                        content: `Balance: ${query[0].balance}`,
+                    },
+                });
+            }
+            catch (error) {
+                return res.send({
+                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data: {
+                        content: `Error: ${error}`,
+                    },
+                });
+            }
+        }
+
+        if (name === "daily") {
+            try {
+                const user_id = member.user.id;
+
+
+            }
+            catch (error) {
+                return res.send({
+                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data: {
+                        content: `Error: ${error}`,
+                    },
+                });
+            }
         }
 
         // console.error(`unknown command: ${name}`);
