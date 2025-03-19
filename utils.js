@@ -60,6 +60,6 @@ export function formatDate(inputDate) {
   return `${day}/${month}/${year} at ${hours}:${minutes}`;
 }
 
-export function capitalize(str) {
+export function capitalise(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
