@@ -416,7 +416,26 @@ const BUY = {
       name: "name",
       description: "Pack name.",
       type: 3,
-      required: true
+      required: true,
+      autocomplete: true
+    },
+    {
+      name: "rarity",
+      description: "Pack rarity (defaults to common).",
+      type: 3,
+      required: false,
+      choices: [
+        { name: "Common", value: "common" },
+        { name: "Rare", value: "rare" },
+        { name: "Epic", value: "epic" },
+        { name: "Legendary", value: "legendary" }
+      ]
+    },
+    {
+      name: "quantity",
+      description: "Amount of packs (defaults to 1).",
+      type: 3,
+      required: false
     }
   ]
 }

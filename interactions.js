@@ -150,6 +150,11 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
 /linktree: ${response["linktree"] || 0}
                                 `,
                                 color: 0x0099ff,
+                                ...( !server && { 
+                                    thumbnail: { 
+                                        url: `https://cdn.discordapp.com/avatars/${member.user.id}/${member.user.avatar}.jpg`
+                                    } 
+                                })
                             }
                         ]
                     },

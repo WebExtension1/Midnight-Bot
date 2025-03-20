@@ -36,7 +36,16 @@ export default async function getPaginatedShop(res, page, returnType) {
                 embeds: [
                     {
                         title: `${response[0].groupName} Shop`,
-                        description: details.join('\n'),
+                        description: `
+## Prices (Midnight Treats)
+Common - 2
+Rare - 3
+Epic - 4
+Legendary - 5
+
+## Cards
+${details.join('\n')}
+                        `,
                         color: 0x0099ff,
                         fields: [
                             { name: "Page", value: `${page} of ${pages}`, inline: true },
