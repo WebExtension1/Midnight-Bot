@@ -33,30 +33,6 @@ client.once('ready', () => {
   });
 });
 
-const getPacks = async () => {
-  try {
-    const response = await fetch(`http://${process.env.DB_HOST}:3333/router/groups/get`, {
-      method: "GET",
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    const data = await response.json();
-    return data.map(pack => ({ name: pack.packName, value: pack.packName }));
-  } catch (error) {
-    console.error("Error fetching packs:", error);
-    return [];
-  }
-};
-
-client.on('interactionCreate', async interaction => {
-  if (interaction.type !== InteractionType.ApplicationCommandAutocomplete) return;
-  
-  if (interaction.commandName === 'buy' && interaction.options.getFocused(true).name === 'name') {
-    const packs = await getPacks();
-    await interaction.respond(packs.slice(0, 25));
-  }
-});
-
 client.login(process.env.BOT_TOKEN);
 
 export { client };

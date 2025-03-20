@@ -416,8 +416,7 @@ const BUY = {
       name: "name",
       description: "Pack name.",
       type: 3,
-      required: true,
-      autocomplete: true
+      required: true
     },
     {
       name: "rarity",
