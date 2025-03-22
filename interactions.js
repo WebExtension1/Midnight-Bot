@@ -30,8 +30,66 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
         const custom_id = data.custom_id;
 
         const items = custom_id.split('_');
-        const direction = items[0];
+
+        if (items[0] === 'buy') {
+            const pack = items[1];
+            const quantity = items[2];
+            const rarity = items[3];
+            const user_id = items[4];
+
+            if (member.user.id !== user_id)
+                return;
+
+            const pricing = {
+                "common": 2,
+                "rare": 3,
+                "epic": 4,
+                "legendary": 5
+            }
+
+            const price = pricing[rarity] * quantity;
+
+            let query = await fetch(`http://${process.env.DB_HOST}:3333/router/users/balance`, {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id })
+            });
+            let response = await query.json();
+
+            if (response.balance < price) {
+                return res.send({
+                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data: {
+                        content: `Sorry, you don't have enough cat treats to complete this purchase! You only have ${response.balance} cat treats.`,
+                    },
+                });
+            }
+
+            query = await fetch(`http://${process.env.DB_HOST}:3333/router/users/buy`, {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id, price, pack, quantity, rarity })
+            });
+            response = await query.json();
+
+            if (response.message === 'Pack bought') {
+                return res.send({
+                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data: {
+                        content: `Successfully bought ${quantity} ${rarity} ${pack} ${quantity === 1 ? 'pack' : 'packs'}.`,
+                    },
+                });
+            }
+            return res.send({
+                type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                data: {
+                    content: `Failed to buy pack.`,
+                },
+            });
+        }
+
         const type = items[1];
+        const direction = items[0];
         let page = items[2];
 
         if (type === "gif" || type === "quote" || type === "fact") {
@@ -645,6 +703,54 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
 
         if (name === 'buy') {
             try {
+                const user_id = member.user.id;
+                const name = options?.find(opt => opt.name === 'name')?.value;
+                const rarity = options?.find(opt => opt.name === 'rarity')?.value || "common";
+                const quantity = options?.find(opt => opt.name === 'quantity')?.value || 1;
+
+                const pricing = {
+                    "common": 2,
+                    "rare": 3,
+                    "epic": 4,
+                    "legendary": 5
+                }
+
+                const price = pricing[rarity] * quantity;
+
+                const query = await fetch(`http://${process.env.DB_HOST}:3333/router/users/balance`, {
+                    method: "POST",
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id })
+                });
+                const response = await query.json();
+
+                if (response.balance < price) {
+                    return res.send({
+                        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                        data: {
+                            content: `Sorry, you don't have enough cat treats to complete this purchase! You only have ${response.balance} cat treats.`,
+                        },
+                    });
+                }
+                return res.send({
+                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data: {
+                        content: `Are you sure you would like to buy ${quantity} ${name} packs for a total of ${price} cat treats?`,
+                        components: [
+                            {
+                                type: 1,
+                                components: [
+                                    {
+                                        type: 2,
+                                        label: "Buy",
+                                        style: 1,
+                                        custom_id: `buy_${name}_${quantity}_${rarity}_${user_id}`
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                });
             }
             catch (error) {
                 return res.send({

@@ -58,10 +58,34 @@ router.post("/daily", async (req, res, next) => {
         if (result.affectedRows > 0)
             balance += 10;
 
-        if (result.affectedRows === 1){
+        if (result.affectedRows === 1)
             return res.json({ balance: balance, valid: 1 });
-        }
         return res.json({ balance: balance, valid: 0 });
+    }
+    catch (error) {
+        next(error);
+    }
+});
+
+router.post('/buy', async (req, res, next) => {
+    try {
+        const { user_id, price, pack, rarity, quantity } = req.body;
+
+        let [result] = await pool.execute(
+            "UPDATE users SET balance = balance - ? WHERE user_id = ?",
+            [price, user_id]
+        );
+
+        [result] = await pool.execute(`
+            INSERT INTO user_packs (user_id, pack_id, rarity, quantity)
+            VALUES (?, (SELECT pack_id FROM packs WHERE name = ?), ?, ?)
+            ON DUPLICATE KEY UPDATE quantity = quantity + VALUES(quantity)
+        `,[user_id, pack, rarity, quantity]
+        );
+
+        if (result.affectedRows === 1)
+            return res.json({ message: "Pack bought" });
+        return res.json({ message: "Failed to buy pack" });
     }
     catch (error) {
         next(error);
