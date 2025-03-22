@@ -38,10 +38,12 @@ export default async function getPaginatedShop(res, page, returnType) {
                         title: `${response[0].groupName} Shop`,
                         description: `
 ## Prices (Midnight Treats)
-Common - 2
-Rare - 3
-Epic - 4
-Legendary - 5
+Common - 10
+Uncommon - 18
+Rare - 31
+Epic - 52
+Legendary - 86
+Deluxe - 141
 
 ## Cards
 ${details.join('\n')}

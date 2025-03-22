@@ -750,7 +750,7 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                 return res.send({
                     type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                     data: {
-                        content: `Are you sure you would like to buy ${quantity} ${name} packs for a total of ${price} cat treats?`,
+                        content: `Are you sure you would like to buy ${quantity} ${name} ${quantity === 1 ? 'pack' : 'packs'} for a total of ${price} cat treats?`,
                         components: [
                             {
                                 type: 1,

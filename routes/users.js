@@ -6,7 +6,7 @@ const router = express.Router();
 async function setupUser(user_id) {
     await pool.execute(`
         INSERT INTO users (user_id, balance) VALUES
-        (?, 25)
+        (?, 50)
     `, [user_id]);
 }
 
@@ -26,7 +26,7 @@ router.post("/balance", async (req, res, next) => {
 
         setupUser(user_id);
 
-        res.json({ balance: 25 });
+        res.json({ balance: 50 });
     }
     catch (error) {
         next(error);
@@ -46,17 +46,17 @@ router.post("/daily", async (req, res, next) => {
         let balance = 0;
         if (result.length === 0) {
             setupUser(user_id);
-            balance = 25;
+            balance = 50;
         } else {
             balance = result[0].balance;
         }
 
         [result] = await pool.execute(
-            "UPDATE users SET balance = balance + 10, daily = CURRENT_DATE WHERE user_id = ? AND daily != CURRENT_DATE",
+            "UPDATE users SET balance = balance + 25, daily = CURRENT_DATE WHERE user_id = ? AND daily != CURRENT_DATE",
             [user_id]
         );
         if (result.affectedRows > 0)
-            balance += 10;
+            balance += 25;
 
         if (result.affectedRows === 1)
             return res.json({ balance: balance, valid: 1 });
