@@ -708,6 +708,21 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                 const rarity = options?.find(opt => opt.name === 'rarity')?.value || "common";
                 const quantity = options?.find(opt => opt.name === 'quantity')?.value || 1;
 
+                let query = await fetch(`http://${process.env.DB_HOST}:3333/router/packs/get`, {
+                    method: "GET",
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                let response = await query.json();
+                const foundPack = response.find(pack => pack.name === name);
+
+                if (!foundPack)
+                    return res.send({
+                        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                        data: {
+                            content: `Pack not found`,
+                        },
+                    });
+
                 const pricing = {
                     "common": 2,
                     "rare": 3,
@@ -717,12 +732,12 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
 
                 const price = pricing[rarity] * quantity;
 
-                const query = await fetch(`http://${process.env.DB_HOST}:3333/router/users/balance`, {
+                query = await fetch(`http://${process.env.DB_HOST}:3333/router/users/balance`, {
                     method: "POST",
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ user_id })
                 });
-                const response = await query.json();
+                response = await query.json();
 
                 if (response.balance < price) {
                     return res.send({
