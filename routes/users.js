@@ -33,6 +33,24 @@ router.post("/balance", async (req, res, next) => {
     }
 });
 
+router.post("/packs", async (req, res, next) => {
+    try {
+        const { user_id } = req.body;
+
+        const [result] = await pool.execute(`
+            SELECT packs.name, rarity, quantity
+            FROM user_packs
+            INNER JOIN packs ON packs.pack_id = user_packs.pack_id
+            WHERE user_id = ?
+        `, [user_id]);
+
+        return res.json(result);
+    }
+    catch (error) {
+        next(error);
+    }
+});
+
 router.post("/daily", async (req, res, next) => {
     try {
         const { user_id } = req.body;

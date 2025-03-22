@@ -101,13 +101,13 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                 page = 0;
             else
                 page = 1000000;
-    
+
             let pagination = 25;
             if (type === 'quote')
                 pagination = 10;
             else if (type === 'fact')
                 pagination = 20;
-    
+
             try {
                 getPaginatedItem(res, type, pagination, page, InteractionResponseType.UPDATE_MESSAGE);
             }
@@ -137,7 +137,7 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                     },
                 });
             }
-        }        
+        }
     }
 
     if (type === InteractionType.APPLICATION_COMMAND) {
@@ -208,10 +208,10 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
 /linktree: ${response["linktree"] || 0}
                                 `,
                                 color: 0x0099ff,
-                                ...( !server && { 
-                                    thumbnail: { 
+                                ...(!server && {
+                                    thumbnail: {
                                         url: `https://cdn.discordapp.com/avatars/${member.user.id}/${member.user.avatar}.jpg`
-                                    } 
+                                    }
                                 })
                             }
                         ]
@@ -690,6 +690,44 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
 
         if (name === 'inventory') {
             try {
+                const user_id = member.user.id;
+
+                const query = await fetch(`http://${process.env.DB_HOST}:3333/router/users/packs`, {
+                    method: "POST",
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id })
+                });
+                const response = await query.json();
+
+                const grouped = response.reduce((pack, { name, rarity, quantity }) => {
+                    if (!pack[name]) {
+                        pack[name] = [];
+                    }
+                    pack[name].push(`${capitalise(rarity)} (${quantity})`);
+                    return pack;
+                }, {});
+
+                let output = '';
+                for (const [name, rarities] of Object.entries(grouped)) {
+                    output += `# ${name}\n${rarities.join('\n')}\n\n`;
+                }
+
+                return res.send({
+                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data: {
+                        content: output,
+                        embeds: [
+                            {
+                                title: `${member.user.username}'s Inventory.`,
+                                description: output,
+                                color: 0x0099ff,
+                                thumbnail: {
+                                    url: `https://cdn.discordapp.com/avatars/${member.user.id}/${member.user.avatar}.jpg`
+                                }
+                            }
+                        ]
+                    },
+                });
             }
             catch (error) {
                 return res.send({
@@ -800,7 +838,7 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                     body: JSON.stringify({ user_id })
                 });
                 const response = await query.json();
-                
+
                 return res.send({
                     type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                     data: {
@@ -828,7 +866,7 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                     body: JSON.stringify({ user_id })
                 });
                 const response = await query.json();
-                
+
                 return res.send({
                     type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                     data: {

@@ -114,7 +114,46 @@ const BALANCE = {
   contexts: [0, 1, 2],
 }
 
-const ALL_COMMANDS = [REACT, QUOTE, LINKTREE, FACT, GIF, STATS, SHOP, CLIP, DAILY, BALANCE];
+const INVENTORY = {
+  name: 'inventory',
+  description: "Display your unopened packs.",
+  type: 1,
+  integration_types: [0, 1],
+  contexts: [0, 1, 2],
+}
+
+const BUY = {
+  name: 'buy',
+  description: "Buy a pack from the store.",
+  options: [
+    {
+      name: "name",
+      description: "Pack name.",
+      type: 3,
+      required: true
+    },
+    {
+      name: "rarity",
+      description: "Pack rarity (defaults to common).",
+      type: 3,
+      required: false,
+      choices: [
+        { name: "Common", value: "common" },
+        { name: "Rare", value: "rare" },
+        { name: "Epic", value: "epic" },
+        { name: "Legendary", value: "legendary" }
+      ]
+    },
+    {
+      name: "quantity",
+      description: "Amount of packs (defaults to 1).",
+      type: 3,
+      required: false
+    }
+  ]
+}
+
+const ALL_COMMANDS = [REACT, QUOTE, LINKTREE, FACT, GIF, STATS, SHOP, CLIP, DAILY, BALANCE, INVENTORY, BUY];
 
 InstallGlobalCommands(process.env.APP_ID, ALL_COMMANDS);
 
@@ -400,45 +439,6 @@ const CLIP_DELETE = {
   ]
 }
 
-const INVENTORY = {
-  name: 'inventory',
-  description: "Display your unopened packs.",
-  type: 1,
-  integration_types: [0, 1],
-  contexts: [0, 1, 2],
-}
-
-const BUY = {
-  name: 'buy',
-  description: "Buy a pack from the store.",
-  options: [
-    {
-      name: "name",
-      description: "Pack name.",
-      type: 3,
-      required: true
-    },
-    {
-      name: "rarity",
-      description: "Pack rarity (defaults to common).",
-      type: 3,
-      required: false,
-      choices: [
-        { name: "Common", value: "common" },
-        { name: "Rare", value: "rare" },
-        { name: "Epic", value: "epic" },
-        { name: "Legendary", value: "legendary" }
-      ]
-    },
-    {
-      name: "quantity",
-      description: "Amount of packs (defaults to 1).",
-      type: 3,
-      required: false
-    }
-  ]
-}
-
 const OPEN = {
   name: 'open',
   description: "Open a pack from your inventory.",
@@ -452,6 +452,6 @@ const OPEN = {
   ]
 }
 
-const ALL_PRIVATE_COMMANDS = [QUOTE_ADD, FACT_ADD, GIF_ADD, CLIP_ADD, REACT_DEBUG, QUOTE_DEBUG, FACT_DEBUG, GIF_DEBUG, CLIP_DEBUG, QUOTE_UPDATE, FACT_UPDATE, GIF_UPDATE, CLIP_UPDATE, QUOTE_DELETE, FACT_DELETE, GIF_DELETE, CLIP_DELETE, INVENTORY, BUY, OPEN];
+const ALL_PRIVATE_COMMANDS = [QUOTE_ADD, FACT_ADD, GIF_ADD, CLIP_ADD, REACT_DEBUG, QUOTE_DEBUG, FACT_DEBUG, GIF_DEBUG, CLIP_DEBUG, QUOTE_UPDATE, FACT_UPDATE, GIF_UPDATE, CLIP_UPDATE, QUOTE_DELETE, FACT_DELETE, GIF_DELETE, CLIP_DELETE, OPEN];
 
 InstallGuildCommands(process.env.APP_ID, process.env.PRIVATE_GUILD_ID, ALL_PRIVATE_COMMANDS);
