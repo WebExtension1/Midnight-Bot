@@ -41,10 +41,12 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                 return;
 
             const pricing = {
-                "common": 2,
-                "rare": 3,
-                "epic": 4,
-                "legendary": 5
+                "common": 10,
+                "uncommon": 18,
+                "rare": 31,
+                "epic": 52,
+                "legendary": 86,
+                "deluxe": 141
             }
 
             const price = pricing[rarity] * quantity;
@@ -715,7 +717,6 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                 return res.send({
                     type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                     data: {
-                        content: output,
                         embeds: [
                             {
                                 title: `${member.user.username}'s Inventory.`,
@@ -762,10 +763,12 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                     });
 
                 const pricing = {
-                    "common": 2,
-                    "rare": 3,
-                    "epic": 4,
-                    "legendary": 5
+                    "common": 10,
+                    "uncommon": 18,
+                    "rare": 31,
+                    "epic": 52,
+                    "legendary": 86,
+                    "deluxe": 141
                 }
 
                 const price = pricing[rarity] * quantity;

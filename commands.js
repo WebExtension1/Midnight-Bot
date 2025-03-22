@@ -139,9 +139,11 @@ const BUY = {
       required: false,
       choices: [
         { name: "Common", value: "common" },
+        { name: "Uncommon", value: "uncommon" },
         { name: "Rare", value: "rare" },
         { name: "Epic", value: "epic" },
-        { name: "Legendary", value: "legendary" }
+        { name: "Legendary", value: "legendary" },
+        { name: "Deluxe", value: "deluxe" }
       ]
     },
     {
