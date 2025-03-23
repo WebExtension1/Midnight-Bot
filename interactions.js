@@ -752,7 +752,7 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                     headers: { 'Content-Type': 'application/json' }
                 });
                 let response = await query.json();
-                const foundPack = response.find(pack => pack.name.toLower() === name.toLower());
+                const foundPack = response.find(pack => pack.name.toLowerCase() === name.toLowerCase());
 
                 if (!foundPack)
                     return res.send({
@@ -791,7 +791,7 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                 return res.send({
                     type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                     data: {
-                        content: `Are you sure you would like to buy ${quantity} ${name} ${quantity === 1 ? 'pack' : 'packs'} for a total of ${price} cat treats?`,
+                        content: `Are you sure you would like to buy ${quantity} ${foundPack.name} ${quantity === 1 ? 'pack' : 'packs'} for a total of ${price} cat treats?`,
                         components: [
                             {
                                 type: 1,
@@ -800,7 +800,7 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                                         type: 2,
                                         label: "Buy",
                                         style: 1,
-                                        custom_id: `buy_${name}_${quantity}_${rarity}_${user_id}`
+                                        custom_id: `buy_${foundPack.name}_${quantity}_${rarity}_${user_id}`
                                     }
                                 ]
                             }
