@@ -752,7 +752,7 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
                     headers: { 'Content-Type': 'application/json' }
                 });
                 let response = await query.json();
-                const foundPack = response.find(pack => pack.name === name);
+                const foundPack = response.find(pack => pack.name.toLower() === name.toLower());
 
                 if (!foundPack)
                     return res.send({
@@ -820,6 +820,28 @@ router.post('/', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (re
 
         if (name === 'open') {
             try {
+                const [image1Data, image2Data] = await Promise.all([
+                    axios.get('https://static.wikia.nocookie.net/freddy-fazbears-pizza/images/6/6b/FFInfoboxImage.png/revision/latest?cb=20231216120333', { responseType: 'arraybuffer' }),
+                    axios.get('https://cdn.imgchest.com/files/7mmc9wedzd7.png', { responseType: 'arraybuffer' })
+                ]);
+
+                const image1 = await loadImage(Buffer.from(image1Data.data, 'binary'));
+                const image2 = await loadImage(Buffer.from(image2Data.data, 'binary'));
+
+                const canvas = createCanvas(image1.width, image1.height);
+                const context = canvas.getContext('2d');
+
+                context.drawImage(image1, 0, 0);
+                context.drawImage(image2, 0, 0, image1.width, image1.height);
+
+                const buffer = canvas.toBuffer('image/png');
+
+                return interaction.reply({
+                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data: {
+                        files: [{ attachment: buffer, name: 'overlay.png' }]
+                    }
+                });
             }
             catch (error) {
                 return res.send({

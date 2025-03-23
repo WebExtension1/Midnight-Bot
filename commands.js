@@ -450,6 +450,12 @@ const OPEN = {
       description: "Pack name.",
       type: 3,
       required: true
+    },
+    {
+      name: "rarity",
+      description: "Pack rarity.",
+      type: 3,
+      required: true
     }
   ]
 }
